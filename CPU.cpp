@@ -1,46 +1,84 @@
 #include "CPU.hpp"
+#include "Exception.h"
 #include <cstdint>
 #include <iostream>
 #include <iomanip>    // 用于格式化输出
+#include <optional>
+
+uint64_t CPU::load(uint64_t addr, uint64_t size)
+{
+    try
+    {
+        return bus.load(addr, size);
+    }
+    catch (const RVEmuException &e)
+    {
+        std::cerr << "Exception load: " << e << std::endl;
+    }
+}
+
+void CPU::store(uint64_t addr, uint64_t size, uint64_t value)
+{
+    try
+    {
+        bus.store(addr, size, value);
+    }
+    catch (const RVEmuException &e)
+    {
+        std::cerr << "Exception store: " << e << std::endl;
+    }
+}
 
 uint32_t CPU::fetch()
 {
-    std::size_t index = static_cast<std::size_t>(pc);
-    uint32_t inst     = static_cast<uint32_t>(dram[index]) |
-                    (static_cast<uint32_t>(dram[index + 1]) << 8) |
-                    (static_cast<uint32_t>(dram[index + 2]) << 16) |
-                    (static_cast<uint32_t>(dram[index + 3]) << 24);
-
-    return inst;
+    try
+    {
+        bus.load(pc, 32);
+    }
+    catch (const RVEmuException &e)
+    {
+        std::cerr << "Exception fetch: " << e << std::endl;
+    }
 }
 
-void CPU::execute(uint32_t inst)
+std::optional<uint64_t> CPU::execute(uint32_t inst)
 {
-    uint32_t opcode = inst & 0x7f;
-    uint32_t rd     = (inst >> 7) & 0x1f;
-    uint32_t rs1    = (inst >> 15) & 0x1f;
-    uint32_t rs2    = (inst >> 20) & 0x1f;
-    uint32_t funct3 = (inst >> 12) & 0x7;
-    uint32_t funct7 = (inst >> 25) & 0x7f;
-
-    // x0 is hardwired zero
-    regs[0] = 0;
-
-    // execute stage
-    switch (opcode)
+    try
     {
-        case 0x13: {    // addi
-            int64_t imm = static_cast<int32_t>(inst & 0xfff00000) >> 20;
-            regs[rd]    = regs[rs1] + imm;
-            break;
+        uint32_t opcode = inst & 0x7f;
+        uint32_t rd     = (inst >> 7) & 0x1f;
+        uint32_t rs1    = (inst >> 15) & 0x1f;
+        uint32_t rs2    = (inst >> 20) & 0x1f;
+        uint32_t funct3 = (inst >> 12) & 0x7;
+        uint32_t funct7 = (inst >> 25) & 0x7f;
+
+        // x0 is hardwired zero
+        regs[0] = 0;
+
+        // execute stage
+        switch (opcode)
+        {
+            case 0x13: {    // addi
+                int64_t imm = static_cast<int32_t>(inst & 0xfff00000) >> 20;
+                std::cout << "ADDI: x" << rd << " = x " << rs1 << " + " << imm
+                          << std::endl;
+                regs[rd] = regs[rs1] + imm;
+                break;
+            }
+            case 0x33: {    // add
+                std::cout << "ADD: x" << rd << " = x " << rs1 << " + " << rs2
+                          << std::endl;
+                regs[rd] = regs[rs1] + regs[rs2];
+                break;
+            }
+            default:
+                throw RVEmuException(RVEmuException::Type::IllegalInstruction, opcode);
         }
-        case 0x33: {    // add
-            regs[rd] = regs[rs1] + regs[rs2];
-            break;
-        }
-        default:
-            std::cerr << "Invalid opcode: " << std::hex << opcode << std::endl;
-            break;
+    }
+    catch (const RVEmuException &e)
+    {
+        std::cerr << "Exception execute : " << e << std::endl;
+        return std::nullopt;
     }
 }
 
@@ -58,4 +96,12 @@ void CPU::dumpRegisters()
                   << std::setw(4) << "x" << i + 3 << "(" << RVABI[i + 3]
                   << ") = " << std::setw(16) << regs[i + 3] << std::endl;
     }
+}
+
+void CPU::dumpPC() const
+{
+    std::cout << std::setw(80) << std::setfill('-') << "" << std::endl;
+    std::cout << "PC register" << std::endl;
+    std::cout << "PC = " << std::hex << pc << std::dec << std::endl;
+    std::cout << std::setw(80) << std::setfill('-') << "" << std::endl;
 }
