@@ -23,5 +23,5 @@ add_executable(
     main.cpp
 )
 
+target_link_libraries(RVEmuCore PRIVATE fmt::fmt-header-only)
 target_link_libraries(rvemu PRIVATE RVEmuCore)
-target_link_libraries(rvemu PRIVATE fmt::fmt-header-only)

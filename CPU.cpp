@@ -2,8 +2,8 @@
 #include "Exception.h"
 #include <cstdint>
 #include <iostream>
-#include <iomanip>    // 用于格式化输出
 #include <optional>
+#include "fmt/core.h"
 
 uint64_t CPU::load(uint64_t addr, uint64_t size)
 {
@@ -13,7 +13,7 @@ uint64_t CPU::load(uint64_t addr, uint64_t size)
     }
     catch (const RVEmuException &e)
     {
-        std::cerr << "Exception load: " << e << std::endl;
+        fmt::print(std::cerr, "Exception load: {}\n", e);
     }
 }
 
@@ -25,7 +25,7 @@ void CPU::store(uint64_t addr, uint64_t size, uint64_t value)
     }
     catch (const RVEmuException &e)
     {
-        std::cerr << "Exception store: " << e << std::endl;
+        fmt::print(std::cerr, "Exception load: {}\n", e);
     }
 }
 
@@ -37,7 +37,7 @@ uint32_t CPU::fetch()
     }
     catch (const RVEmuException &e)
     {
-        std::cerr << "Exception fetch: " << e << std::endl;
+        fmt::print(std::cerr, "Exception fetch: {}\n", e);
     }
 }
 
@@ -55,21 +55,17 @@ std::optional<uint64_t> CPU::execute(uint32_t inst)
         // x0 is hardwired zero
         regs[0] = 0;
 
-        std::cout << "Executing instruction: 0x" << std::hex << inst << std::dec << std::endl;
-
-        // execute stage
+        fmt::print("Executing instruction: {:#x}\n", inst);
         switch (opcode)
         {
             case 0x13: {    // addi
                 int64_t imm = static_cast<int32_t>(inst & 0xfff00000) >> 20;
-                std::cout << "ADDI: x" << rd << " = x" << rs1 << " + " << imm
-                          << std::endl;
+                fmt::print("ADDI: x{} = x{} + {}\n", rd, rs1, imm);
                 regs[rd] = regs[rs1] + imm;
                 return updatePC();
             }
             case 0x33: {    // add
-                std::cout << "ADD: x" << rd << " = x" << rs1 << " + " << rs2
-                          << std::endl;
+                fmt::print("ADD: x{} = x{} + {}\n", rd, rs1, rs2);
                 regs[rd] = regs[rs1] + regs[rs2];
                 return updatePC();
             }
@@ -79,31 +75,25 @@ std::optional<uint64_t> CPU::execute(uint32_t inst)
     }
     catch (const RVEmuException &e)
     {
-        std::cerr << "Exception execute : " << e << std::endl;
+        fmt::print(std::cerr, "Exception execute: {}\n", e);
         return std::nullopt;
     }
 }
 
 void CPU::dumpRegisters()
 {
-    std::cout << std::setw(80) << std::setfill('-') << "" << std::endl;    // 打印分隔线
-    std::cout << std::setfill(' ');    // 重置填充字符
-    for (size_t i = 0; i < 32; i += 4)
+    fmt::print("{:-^100}\n", "registers");
+    for (size_t i = 0; i < 32; i += 1)
     {
-        std::cout << std::setw(4) << "x" << i << "(" << RVABI[i] << ") = " << std::hex
-                  << std::setw(16) << std::setfill('0') << regs[i] << " " << std::setw(4)
-                  << "x" << i + 1 << "(" << RVABI[i + 1] << ") = " << std::setw(16)
-                  << regs[i + 1] << " " << std::setw(4) << "x" << i + 2 << "("
-                  << RVABI[i + 2] << ") = " << std::setw(16) << regs[i + 2] << " "
-                  << std::setw(4) << "x" << i + 3 << "(" << RVABI[i + 3]
-                  << ") = " << std::setw(16) << regs[i + 3] << std::endl;
+        fmt::print("x{}({}) = {:#016x} {:<3}", i, RVABI[i], regs[i], " ");
+        if ((i + 1) % 4 == 0)
+            fmt::print("\n");
     }
 }
 
 void CPU::dumpPC() const
 {
-    std::cout << std::setw(80) << std::setfill('-') << "" << std::endl;
-    std::cout << "PC register" << std::endl;
-    std::cout << "PC = " << std::hex << pc << std::dec << std::endl;
-    std::cout << std::setw(80) << std::setfill('-') << "" << std::endl;
+    fmt::print("{:-^100}\n", "PC");
+    fmt::print("PC = {:#x}\n", pc);
+    fmt::print("{:-^100}\n", "");
 }

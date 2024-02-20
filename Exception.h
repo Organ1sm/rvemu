@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstdint>
+#include <fmt/core.h>
+#include <fmt/ostream.h>
 #include <iostream>
 
 class RVEmuException
@@ -38,3 +40,7 @@ class RVEmuException
 
     bool isFatal() const;
 };
+
+template <>
+struct fmt::formatter<RVEmuException> : ostream_formatter
+{};

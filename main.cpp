@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <fmt/core.h>
 #include <iostream>
 #include <fstream>
 #include "CPU.hpp"
@@ -9,14 +10,14 @@ int main(int argc, char *argv[])
     if (argc != 2)
     {
         std::cout << "Usage:\n"
-                  << "- ./program_name <filename>\n";
+                  << "- ./rvemu <filename>\n";
         return 0;
     }
 
     std::ifstream file(argv[1], std::ios::binary);
     if (!file)
     {
-        std::cerr << "Cannot open file: " << argv[1] << std::endl;
+        fmt::print(std::cerr, "Cannot open file: {}\n", argv[1]);
         return 1;
     }
 
@@ -37,7 +38,7 @@ int main(int argc, char *argv[])
     }
     catch (const RVEmuException &e)
     {
-        std::cerr << "RVEmuException main: " << e << std::endl;
+        fmt::print(std::cerr, "RVEmuException main:  {}\n", e);
     }
 
 
