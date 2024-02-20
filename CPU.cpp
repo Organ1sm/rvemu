@@ -33,7 +33,7 @@ uint32_t CPU::fetch()
 {
     try
     {
-        bus.load(pc, 32);
+        return bus.load(pc, 32);
     }
     catch (const RVEmuException &e)
     {
@@ -55,21 +55,23 @@ std::optional<uint64_t> CPU::execute(uint32_t inst)
         // x0 is hardwired zero
         regs[0] = 0;
 
+        std::cout << "Executing instruction: 0x" << std::hex << inst << std::dec << std::endl;
+
         // execute stage
         switch (opcode)
         {
             case 0x13: {    // addi
                 int64_t imm = static_cast<int32_t>(inst & 0xfff00000) >> 20;
-                std::cout << "ADDI: x" << rd << " = x " << rs1 << " + " << imm
+                std::cout << "ADDI: x" << rd << " = x" << rs1 << " + " << imm
                           << std::endl;
                 regs[rd] = regs[rs1] + imm;
-                break;
+                return updatePC();
             }
             case 0x33: {    // add
-                std::cout << "ADD: x" << rd << " = x " << rs1 << " + " << rs2
+                std::cout << "ADD: x" << rd << " = x" << rs1 << " + " << rs2
                           << std::endl;
                 regs[rd] = regs[rs1] + regs[rs2];
-                break;
+                return updatePC();
             }
             default:
                 throw RVEmuException(RVEmuException::Type::IllegalInstruction, opcode);
