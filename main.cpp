@@ -22,25 +22,24 @@ int main(int argc, char *argv[])
     }
 
     std::vector<uint8_t> code(std::istreambuf_iterator<char>(file), {});
-    CPU cpu(code);
+    rvemu::CPU cpu(code);
 
-    try
+    while (true)
     {
-        while (true)
+        auto inst = cpu.fetch();
+        if (inst.has_value())
         {
-            uint32_t inst = cpu.fetch();
-            auto newPC    = cpu.execute(inst);
+            auto newPC = cpu.execute(inst.value());
             if (newPC.has_value())
                 cpu.pc = newPC.value();
             else
                 break;
         }
+        else
+        {
+            break;
+        }
     }
-    catch (const RVEmuException &e)
-    {
-        fmt::print(std::cerr, "RVEmuException main:  {}\n", e);
-    }
-
 
     cpu.dumpRegisters();
     cpu.dumpPC();

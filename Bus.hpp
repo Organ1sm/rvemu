@@ -2,18 +2,21 @@
 
 #include "DRAM.hpp"
 #include <cstdint>
+#include <optional>
 #include <vector>
 
-class Bus
+namespace rvemu
 {
-  public:
-    Bus(const std::vector<uint8_t> &code) : dram_(code) {}
+    class Bus
+    {
+      public:
+        Bus(const std::vector<uint8_t> &code) : dram_(code) {}
 
-    uint64_t load(uint64_t addr, uint64_t size);
+        std::optional<uint64_t> load(uint64_t addr, uint64_t size);
 
-    void store(uint64_t addr, uint64_t size, uint64_t value);
+        bool store(uint64_t addr, uint64_t size, uint64_t value);
 
-
-  private:
-    DRAM dram_;
-};
+      private:
+        DRAM dram_;
+    };
+}    // namespace rvemu
