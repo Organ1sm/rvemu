@@ -29,12 +29,22 @@ add_library(
 
 add_executable(rvemu main.cpp)
 
+include(CTest)
+include(Catch)
 add_executable(
-    utilTest
+    unitTest
     tests/testUtil.hpp
     tests/testUtil.cpp
+    tests/instructionsTest.cpp
 )
 
 target_link_libraries(RVEmuCore PRIVATE fmt::fmt-header-only)
 target_link_libraries(rvemu PRIVATE RVEmuCore)
-target_link_libraries(utilTest PRIVATE RVEmuCore Catch2::Catch2)
+target_link_libraries(
+    unitTest
+    PRIVATE
+        RVEmuCore
+        Catch2::Catch2WithMain
+)
+
+catch_discover_tests(unitTest)
