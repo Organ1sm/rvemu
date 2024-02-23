@@ -5,7 +5,7 @@
 
 namespace rvemu
 {
-    const std::string start = ".global _start \n _start:";
+    const std::string start = ".global _start \n _start: \n";
 
     void generateRVAssembly(const std::string &csrc);
     void generateRVObj(const std::string &assembly);

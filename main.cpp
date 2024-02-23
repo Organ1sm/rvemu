@@ -1,9 +1,8 @@
 #include <cstdint>
-#include <fmt/core.h>
+#include <fmt/ostream.h>
 #include <iostream>
 #include <fstream>
 #include "CPU.hpp"
-#include "Exception.h"
 
 int main(int argc, char *argv[])
 {

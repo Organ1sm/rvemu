@@ -43,7 +43,11 @@ namespace rvemu
         fmt::print("{:-^100}\n", "registers");
         for (size_t i = 0; i < 32; i += 1)
         {
-        fmt::print("x{}{:<6} = {:#016x} {:<3}", i, "(" + RVABI[i] + ")", regs[i], " ");
+            fmt::print("x{}{:<6} = {:#016x} {:<3}",
+                       i,
+                       "(" + RVABI[i] + ")",
+                       regs[i],
+                       " ");
             if ((i + 1) % 4 == 0)
                 fmt::print("\n");
         }

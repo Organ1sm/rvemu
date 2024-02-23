@@ -78,6 +78,7 @@ namespace rvemu
             CPU cpu     = rvHelper(code, "test_srai", 2);
             auto result = static_cast<int64_t>(cpu.regs[1]);
             REQUIRE(cpu.regs[2] == -16);
+            REQUIRE(result == -2);
         }
 
         SECTION("test add instruction")
