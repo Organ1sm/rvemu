@@ -80,7 +80,7 @@ namespace rvemu
             try
             {
                 auto inst = cpu.fetch();
-                if (inst.has_value())
+                if (inst.has_value() && inst != 0)
                 {
                     auto newPC = cpu.execute(inst.value());
                     if (newPC.has_value())

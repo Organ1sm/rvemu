@@ -2,6 +2,7 @@
 #include <fmt/ostream.h>
 #include <iostream>
 #include <fstream>
+#include <optional>
 #include "CPU.hpp"
 
 int main(int argc, char *argv[])
@@ -26,7 +27,7 @@ int main(int argc, char *argv[])
     while (true)
     {
         auto inst = cpu.fetch();
-        if (inst.has_value())
+        if (inst.has_value() && inst.value() != 0)
         {
             auto newPC = cpu.execute(inst.value());
             if (newPC.has_value())
