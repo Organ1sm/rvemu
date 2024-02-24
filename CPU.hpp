@@ -49,6 +49,8 @@ namespace rvemu
 
         void dumpPC() const;
 
+        uint64_t getRegValueByName(const std::string &regName);
+
       private:
         const std::array<std::string, 32> RVABI;
     };

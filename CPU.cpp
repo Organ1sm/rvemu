@@ -1,7 +1,9 @@
 #include "CPU.hpp"
 #include "InstructionExecutor.hpp"
 #include "Log.hpp"
+#include <algorithm>
 #include <cstdint>
+#include <iterator>
 #include <optional>
 #include "fmt/core.h"
 
@@ -87,4 +89,17 @@ namespace rvemu
         fmt::print("PC = {:#x}\n", pc);
         fmt::print("{:-^100}\n", "");
     }
+
+    uint64_t CPU::getRegValueByName(const std::string &regName)
+    {
+        auto it = std::find(RVABI.begin(), RVABI.end(), regName);
+        if (it != RVABI.end())
+        {
+            int index = std::distance(RVABI.begin(), it);
+            return regs[index];
+        }
+        else
+            throw std::invalid_argument("Invalid register name: " + regName);
+    }
+
 }    // namespace rvemu

@@ -16,6 +16,21 @@ namespace std
             return hash<uint32_t>()(std::get<0>(t)) ^ hash<uint32_t>()(std::get<1>(t));
         }
     };
+
+    template <>
+    struct hash<std::tuple<uint32_t, uint32_t, uint32_t>>
+    {
+        size_t operator()(const std::tuple<uint32_t, uint32_t, uint32_t> &key) const
+        {
+            // 自定义哈希函数的实现
+            size_t hash_value = std::hash<unsigned int> {}(std::get<0>(key));
+            hash_value ^= std::hash<unsigned int> {}(std::get<1>(key)) + 0x9e3779b9 +
+                          (hash_value << 6) + (hash_value >> 2);
+            hash_value ^= std::hash<unsigned int> {}(std::get<2>(key)) + 0x9e3779b9 +
+                          (hash_value << 6) + (hash_value >> 2);
+            return hash_value;
+        }
+    };
 }    // namespace std
 
 namespace rvemu
@@ -27,6 +42,257 @@ namespace rvemu
             (inst >> 15) & 0x1f,    // rs1
             (inst >> 20) & 0x1f,    // rs2
         };
+    }
+
+    std::optional<uint64_t> executeFence(CPU &cpu, uint32_t inst)
+    {
+        return cpu.updatePC();
+    }
+
+    std::optional<uint64_t> executeLb(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+        int64_t imm         = static_cast<int32_t>(inst & 0xfff00000) >> 20;
+        uint64_t addr       = cpu.regs[rs1] + imm;
+
+        LOG(INFO, fmt::format("LB: x{} = MEM[x{} + {}]", rd, rs1, imm));
+
+        auto val = cpu.load(addr, 8);
+        if (val.has_value())
+        {
+            cpu.regs[rd] = static_cast<uint64_t>(static_cast<int8_t>(val.value() & 0xff));
+            return cpu.updatePC();
+        }
+
+        LOG(ERROR, "LB FAILED!");
+        return std::nullopt;
+    }
+
+
+    std::optional<uint64_t> executeLh(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+        int64_t imm         = static_cast<int32_t>(inst & 0xfff00000) >> 20;
+        uint64_t addr       = cpu.regs[rs1] + imm;
+
+        LOG(INFO, fmt::format("LH: x{} = MEM[x{} + {}]", rd, rs1, imm));
+
+        auto val = cpu.load(addr, 16);
+        if (val.has_value())
+        {
+            cpu.regs[rd] =
+                static_cast<uint64_t>(static_cast<int16_t>(val.value() & 0xffff));
+            return cpu.updatePC();
+        }
+
+        LOG(ERROR, "LH FAILED!");
+        return std::nullopt;
+    }
+
+    std::optional<uint64_t> executeLw(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+        int64_t imm         = static_cast<int32_t>(inst & 0xfff00000) >> 20;
+        uint64_t addr       = cpu.regs[rs1] + imm;
+
+        LOG(INFO, fmt::format("LW: x{} = MEM[x{} + {}]", rd, rs1, imm));
+
+        auto val = cpu.load(addr, 32);
+        if (val.has_value())
+        {
+            cpu.regs[rd] =
+                static_cast<uint64_t>(static_cast<int32_t>(val.value() & 0xffffffff));
+            return cpu.updatePC();
+        }
+
+        LOG(ERROR, "LW FAILED!");
+        return std::nullopt;
+    }
+
+    std::optional<uint64_t> executeLd(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+        int64_t imm         = static_cast<int32_t>(inst & 0xfff00000) >> 20;
+        uint64_t addr       = cpu.regs[rs1] + imm;
+
+        LOG(INFO, fmt::format("LD: x{} = MEM[x{} + {}]", rd, rs1, imm));
+
+        auto val = cpu.load(addr, 64);
+        if (val.has_value())
+        {
+            cpu.regs[rd] = val.value();
+            return cpu.updatePC();
+        }
+
+        LOG(ERROR, "LD FAILED!");
+        return std::nullopt;
+    }
+
+    std::optional<uint64_t> executeLbu(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+        int64_t imm         = static_cast<int32_t>(inst & 0xfff00000) >> 20;
+        uint64_t addr       = cpu.regs[rs1] + imm;
+
+        LOG(INFO, fmt::format("LBU: x{} = MEM[x{} + {}]", rd, rs1, imm));
+
+        auto val = cpu.load(addr, 8);
+        if (val.has_value())
+        {
+            cpu.regs[rd] = val.value() & 0xff;    // zero extend
+            return cpu.updatePC();
+        }
+
+        LOG(ERROR, "LBU FAILED!");
+        return std::nullopt;
+    }
+
+    std::optional<uint64_t> executeLhu(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+        int64_t imm         = static_cast<int32_t>(inst & 0xfff00000) >> 20;
+        uint64_t addr       = cpu.regs[rs1] + imm;
+
+        LOG(INFO, fmt::format("LHU: x{} = MEM[x{} + {}]", rd, rs1, imm));
+
+        auto val = cpu.load(addr, 16);
+        if (val.has_value())
+        {
+            cpu.regs[rd] = val.value() & 0xffff;    // zero extend
+            return cpu.updatePC();
+        }
+
+        LOG(ERROR, "LHU FAILED!");
+        return std::nullopt;
+    }
+
+    std::optional<uint64_t> executeLwu(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+        int64_t imm         = static_cast<int32_t>(inst & 0xfff00000) >> 20;
+        uint64_t addr       = cpu.regs[rs1] + imm;
+
+        LOG(INFO, fmt::format("LWU: x{} = MEM[x{} + {}]", rd, rs1, imm));
+
+        auto val = cpu.load(addr, 32);
+        if (val.has_value())
+        {
+            cpu.regs[rd] = val.value() & 0xffffffff;    // zero extend
+            return cpu.updatePC();
+        }
+
+        LOG(ERROR, "LWU FAILED!");
+        return std::nullopt;
+    }
+
+    int64_t getStoreImm(uint32_t inst)
+    {
+        return ((static_cast<int32_t>(inst & 0xfe000000) >> 20) & 0xffffffffffffffe0) |
+               ((inst >> 7) & 0x1f);
+    }
+
+    std::optional<uint64_t> executeSb(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+        int64_t imm         = getStoreImm(inst);
+        uint64_t addr       = cpu.regs[rs1] + imm;
+
+        LOG(INFO, fmt::format("SB: x{} = x{} + {} addr: {}", rd, rs1, imm, addr));
+
+        bool isSuc = cpu.store(addr, 8, cpu.regs[rs2]);
+        if (isSuc)
+        {
+            LOG(INFO, "SB SUCCESS!")
+            return cpu.updatePC();
+        }
+
+        LOG(ERROR, "SB FAILED!")
+        return std::nullopt;
+    }
+
+    std::optional<uint64_t> executeStoreByte(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+        int64_t imm         = getStoreImm(inst);
+        uint64_t addr       = cpu.regs[rs1] + imm;
+
+        LOG(INFO, "SB: x", rd, " = x", rs1, " + ", imm, " addr: ", addr);
+
+        bool isSuc = cpu.store(addr, 8, cpu.regs[rs2]);
+        if (isSuc)
+        {
+            LOG(INFO, "SB SUCCESS!");
+            return cpu.updatePC();
+        }
+
+        LOG(ERROR, "SB FAIL!");
+        return std::nullopt;
+    }
+
+    std::optional<uint64_t> executeStoreHalf(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+        int64_t imm         = getStoreImm(inst);
+        uint64_t addr       = cpu.regs[rs1] + imm;
+
+        cpu.store(addr, 16, cpu.regs[rs2]);
+        return cpu.updatePC();
+    }
+
+    std::optional<uint64_t> executeStoreWord(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+        int64_t imm         = getStoreImm(inst);
+        uint64_t addr       = cpu.regs[rs1] + imm;
+
+        cpu.store(addr, 32, cpu.regs[rs2]);
+        return cpu.updatePC();
+    }
+
+    std::optional<uint64_t> executeStoreDouble(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+        int64_t imm         = getStoreImm(inst);
+        uint64_t addr       = cpu.regs[rs1] + imm;
+
+        cpu.store(addr, 64, cpu.regs[rs2]);
+        return cpu.updatePC();
+    }
+
+    std::optional<uint64_t> executeStore(CPU &cpu, uint32_t inst)
+    {
+        auto [rs1, rs2, funct3] = interpretInst(inst);
+        int64_t imm             = getStoreImm(inst);
+        uint64_t addr           = cpu.regs[rs1] + imm;
+
+        switch (funct3)
+        {
+            case 0x0: {
+                // sb
+                cpu.store(addr, 8, cpu.regs[rs2]);
+                break;
+            }
+            case 0x1: {
+                // sh
+                cpu.store(addr, 16, cpu.regs[rs2]);
+                break;
+            }
+            case 0x2: {
+                // sw
+                cpu.store(addr, 32, cpu.regs[rs2]);
+                break;
+            }
+            case 0x3: {
+                // sd
+                cpu.store(addr, 64, cpu.regs[rs2]);
+                break;
+            }
+            default:
+                // Unreachable, as the funct3 values are known
+                break;
+        }
+
+        return cpu.updatePC();
     }
 
     std::optional<uint64_t> executeAddI(CPU &cpu, uint32_t inst)
@@ -198,6 +464,5 @@ namespace rvemu
         }
         return std::nullopt;    // 确保所有可能的执行路径都有明确的返回值
     }
-
 
 }    // namespace rvemu
