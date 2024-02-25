@@ -1,4 +1,5 @@
 #include "testUtil.hpp"
+#include "../Log.hpp"
 #include <cstdint>
 #include <cstdlib>
 #include <fmt/core.h>
@@ -58,7 +59,7 @@ namespace rvemu
         std::string filename = testname + ".s";
         std::ofstream file(filename);
         if (!file.is_open())
-            throw std::runtime_error("Failed to create assembly file.");
+            LOG(ERROR, "Failed to create assembly file.");
 
         file << code;
         file.close();
@@ -69,35 +70,45 @@ namespace rvemu
         std::string binFilename = testname + ".bin";
         std::ifstream binFile(binFilename, std::ios::binary);
         if (!binFile.is_open())
-            throw std::runtime_error("Failed to open binary file");
+            LOG(ERROR, "Failed to open binary file.");
 
         std::vector<uint8_t> binaryCode((std::istreambuf_iterator<char>(binFile)),
                                         std::istreambuf_iterator<char>());
 
+        fmt::print(fg(colors[DEBUG]), "{:=^100}\n", "Debug");
+
         CPU cpu(binaryCode);
         for (std::size_t i = 0; i < nClock; ++i)
         {
-            try
+            auto inst = cpu.fetch();
+            if (inst.has_value() && inst != 0)
             {
-                auto inst = cpu.fetch();
-                if (inst.has_value() && inst != 0)
+                auto newPC = cpu.execute(inst.value());
+                if (newPC.has_value())
                 {
-                    auto newPC = cpu.execute(inst.value());
-                    if (newPC.has_value())
-                        cpu.pc = newPC.value();
-                    else
-                        break;
+                    cpu.pc = newPC.value();
+                    LOG(DEBUG,
+                        fmt::format("Successfully executed instruction at clock cycle {}",
+                                    i + 1));
                 }
                 else
                 {
+                    LOG(DEBUG,
+                        fmt::format("Successfully executed instruction at clock cycle {}",
+                                    i + 1));
+
                     break;
                 }
             }
-            catch (const std::exception &e)
+            else
             {
-                fmt::print(std::cerr, "CPU execution error: {}\n", e.what());
+                LOG(DEBUG,
+                    fmt::format("No more instructions to execute at clock cycle {}",
+                                i + 1));
                 break;
             }
+
+            fmt::print(fg(colors[DEBUG]), "{:=^100}\n", "");
         }
         return cpu;
     }

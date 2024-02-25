@@ -12,7 +12,7 @@ constexpr bool ENABLE_DEBUG_PANIC         = true;
 constexpr std::string_view levelStrings[] = {"DEBUG", "INFO", "WARNING", "ERROR"};
 
 constexpr fmt::color colors[] = {
-    fmt::color::blue,
+    fmt::color::sky_blue,
     fmt::color::green,
     fmt::color::yellow,
     fmt::color::red,
@@ -26,14 +26,8 @@ enum LogLevel {
     ERROR,
 };
 
-inline void vlog(LogLevel level,
-                 const char *fName,
-                 const char *file,
-                 int line,
-                 fmt::string_view format,
-                 fmt::format_args args)
+inline void vlog(LogLevel level, fmt::format_args args, fmt::string_view format = "{}\n")
 {
-    fmt::print(fg(colors[level]), "In function {} ({}:{}): ", fName, file, line);
     fmt::vprint(stdout, fg(colors[level]), format, args);
 }
 
@@ -47,7 +41,9 @@ template <Printable... Args>
 void log(LogLevel level, const char *fName, const char *file, int line, Args &&...args)
 {
     fmt::print(fmt::emphasis::bold | fg(colors[level]), "[{}] ", levelStrings[level]);
-    vlog(level, fName, file, line, "{}\n", fmt::make_format_args(args...));
+    fmt::print(fg(colors[level]), "In function {} ({}:{}): ", fName, file, line);
+
+    vlog(level, fmt::make_format_args(args...));
 
     if (level == ERROR && ENABLE_DEBUG_PANIC)
     {
@@ -57,3 +53,4 @@ void log(LogLevel level, const char *fName, const char *file, int line, Args &&.
 }
 
 #define LOG(level, ...) log(level, __FUNCTION__, __FILE__, __LINE__, __VA_ARGS__);
+#define LOG_DEBUG(msg)  vlog(DEBUG, fmt::make_format_args(msg));
