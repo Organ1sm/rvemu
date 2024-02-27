@@ -26,6 +26,7 @@ add_library(
     InstructionExecutor.hpp
     InstructionExecutor.cpp
     Log.hpp
+    CSR.hpp
 )
 
 add_executable(rvemu main.cpp)

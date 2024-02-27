@@ -4,6 +4,7 @@
 #include <fstream>
 #include <optional>
 #include "CPU.hpp"
+#include "Log.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -27,18 +28,20 @@ int main(int argc, char *argv[])
     while (true)
     {
         auto inst = cpu.fetch();
-        if (inst.has_value() && inst.value() != 0)
+        if (!inst.has_value() || inst.value() == 0)
         {
-            auto newPC = cpu.execute(inst.value());
-            if (newPC.has_value())
-                cpu.pc = newPC.value();
-            else
-                break;
-        }
-        else
-        {
+            LOG(INFO, "END OF Program reached.");
             break;
         }
+
+        auto newPC = cpu.execute(inst.value());
+        if (!newPC.has_value())
+        {
+            LOG(ERROR, "Execution of instruction failed.");
+            break;
+        }
+
+        cpu.pc = newPC.value();
     }
 
     cpu.dumpRegisters();

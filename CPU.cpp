@@ -18,7 +18,7 @@ namespace rvemu
             return val;
         }
 
-        LOG(ERROR, fmt::format("Load failed Invalid address: {:#x} ", addr));
+        LOG(WARNING, fmt::format("Load failed Invalid address: {:#x} ", addr));
         return std::nullopt;
     }
 
@@ -34,7 +34,7 @@ namespace rvemu
         if (result)
             LOG(INFO, "Store successful.")
         else
-            LOG(ERROR, "Store failed.")
+            LOG(WARNING, "Store failed.")
 
         return result;
     }
@@ -48,7 +48,7 @@ namespace rvemu
             return inst.value();
         }
 
-        LOG(ERROR, fmt::format("Fetch failed. Invalid PC: {:#x}", pc))
+        LOG(WARNING, fmt::format("Fetch failed. Invalid PC: {:#x}", pc))
         return std::nullopt;
     }
 
