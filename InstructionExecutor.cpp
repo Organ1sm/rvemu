@@ -675,6 +675,118 @@ namespace rvemu
         return std::nullopt;
     }
 
+    std::optional<uint64_t> executeCsrRW(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+        auto csrAddr        = (inst & 0xfff00000) >> 20;
+
+        // Load the value from the CSR register
+        uint64_t t = cpu.csr.load(csrAddr);
+
+        // Store the value from the rs1 register into the CSR register
+        cpu.csr.store(csrAddr, cpu.regs[rs1]);
+
+        // Store the original CSR value into the rd register
+        cpu.regs[rd] = t;
+
+        // Update the program counter
+        return cpu.updatePC();
+    }
+
+    std::optional<uint64_t> executeCsrRS(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+        auto csrAddr        = (inst & 0xfff00000) >> 20;
+
+        // Load the value from the CSR register
+        uint64_t t = cpu.csr.load(csrAddr);
+
+        // Store the original CSR value into the rd register
+        cpu.regs[rd] = t;
+
+        // Perform bitwise OR operation between the CSR register value and the rs1
+        // register value and store the result back into the CSR register
+        cpu.csr.store(csrAddr, t | cpu.regs[rs1]);
+
+        // Update the program counter
+        return cpu.updatePC();
+    }
+
+    std::optional<uint64_t> executeCsrRC(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+        auto csrAddr        = (inst & 0xfff00000) >> 20;
+
+        // Load the value from the CSR register
+        uint64_t t = cpu.csr.load(csrAddr);
+
+        // Store the original CSR value into the rd register
+        cpu.regs[rd] = t;
+
+        // Perform bitwise AND operation between the CSR register value and the bitwise
+        // NOT of the rs1 register value and store the result back into the CSR register
+        cpu.csr.store(csrAddr, t & ~cpu.regs[rs1]);
+
+        // Update the program counter
+        return cpu.updatePC();
+    }
+
+    std::optional<uint64_t> executeCsrRWI(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+        auto csrAddr        = (inst & 0xfff00000) >> 20;
+
+        // Load the value from the CSR register
+        uint64_t t = cpu.csr.load(csrAddr);
+
+        // Store the original CSR value into the rd register
+        cpu.regs[rd] = t;
+
+        // Set the CSR register value to the immediate value
+        cpu.csr.store(csrAddr, rs1);
+
+        // Update the program counter
+        return cpu.updatePC();
+    }
+
+    std::optional<uint64_t> executeCsrRSI(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+        auto csrAddr        = (inst & 0xfff00000) >> 20;
+
+        // Load the value from the CSR register
+        uint64_t t = cpu.csr.load(csrAddr);
+
+        // Store the original CSR value into the rd register
+        cpu.regs[rd] = t;
+
+        // Perform bitwise OR operation between the CSR register value and the immediate
+        // value and store the result back into the CSR register
+        cpu.csr.store(csrAddr, t | (1 << rs1));
+
+        // Update the program counter
+        return cpu.updatePC();
+    }
+
+    std::optional<uint64_t> executeCsrRCI(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+        auto csr_addr       = (inst & 0xfff00000) >> 20;
+
+        // Load the value from the CSR register
+        uint64_t t = cpu.csr.load(csr_addr);
+
+        // Store the original CSR value into the rd register
+        cpu.regs[rd] = t;
+
+        // Perform bitwise AND operation between the CSR register value and the bitwise
+        // NOT of the immediate value and store the result back into the CSR register
+        cpu.csr.store(csr_addr, t & ~rs1);
+
+        // Update the program counter
+        return cpu.updatePC();
+    }
+
     std::optional<uint64_t> InstructionExecutor::execute(CPU &cpu, uint32_t inst)
     {
         uint32_t opcode = inst & 0x0000007f;
@@ -739,6 +851,12 @@ namespace rvemu
                 {std::make_tuple(0x23, 0x0), executeStoreByte  },
                 {std::make_tuple(0x23, 0x3), executeStoreDouble},
                 {std::make_tuple(0x63, 0x1), executeBEQ        },
+                {std::make_tuple(0x73, 0x1), executeCsrRW      },
+                {std::make_tuple(0x73, 0x2), executeCsrRS      },
+                {std::make_tuple(0x73, 0x3), executeCsrRC      },
+                {std::make_tuple(0x73, 0x5), executeCsrRWI     },
+                {std::make_tuple(0x73, 0x6), executeCsrRSI     },
+                {std::make_tuple(0x73, 0x7), executeCsrRCI     },
         };
 
         auto it = instructionMap.find({opcode, funct3});
@@ -807,5 +925,4 @@ namespace rvemu
             return std::nullopt;
         }
     }
-
 }    // namespace rvemu

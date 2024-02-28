@@ -18,6 +18,12 @@ namespace rvemu
             return dram_.load(addr, size);
         }
 
+        LOG(WARNING,
+            fmt::format(
+                "Invalid address for load operation: {:#x}. Valid address range is [{:#x}, {:#x}] ",
+                addr,
+                DRAM_BASE,
+                DRAM_END));
         return std::nullopt;
     }
 
@@ -36,7 +42,7 @@ namespace rvemu
         }
         else
         {
-            LOG(ERROR,
+            LOG(WARNING,
                 fmt::format(
                     "Invalid address for store operation: {:#x}. Valid address range is [{:#x}, {:#x}] ",
                     addr,

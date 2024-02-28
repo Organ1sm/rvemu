@@ -27,6 +27,7 @@ add_library(
     InstructionExecutor.cpp
     Log.hpp
     CSR.hpp
+    CSR.cpp
 )
 
 add_executable(rvemu main.cpp)
@@ -34,19 +35,28 @@ add_executable(rvemu main.cpp)
 include(CTest)
 include(Catch)
 add_executable(
-    unitTest
+    instTest
     tests/testUtil.hpp
     tests/testUtil.cpp
     tests/instructionsTest.cpp
 )
 
+add_executable(csrTest tests/CSRTest.cpp)
+
 target_link_libraries(RVEmuCore PRIVATE fmt::fmt-header-only)
 target_link_libraries(rvemu PRIVATE RVEmuCore)
 target_link_libraries(
-    unitTest
+    instTest
+    PRIVATE
+        RVEmuCore
+        Catch2::Catch2WithMain
+)
+target_link_libraries(
+    csrTest
     PRIVATE
         RVEmuCore
         Catch2::Catch2WithMain
 )
 
-catch_discover_tests(unitTest)
+catch_discover_tests(instTest)
+catch_discover_tests(csrTest)

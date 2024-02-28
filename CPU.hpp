@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Bus.hpp"
+#include "CSR.hpp"
 #include "RVEmu.h"
 #include <array>
 #include <cstdint>
@@ -15,7 +16,7 @@ namespace rvemu
     {
       public:
         CPU(std::vector<uint8_t> &code)
-            : pc(DRAM_BASE), bus(code),
+            : pc(DRAM_BASE), bus(code), csr(),
               RVABI {
                   "zero", "ra", "sp", "gp", "tp",  "t0",  "t1", "t2", "s0", "s1", "a0",
                   "a1",   "a2", "a3", "a4", "a5",  "a6",  "a7", "s2", "s3", "s4", "s5",
@@ -35,6 +36,8 @@ namespace rvemu
 
         Bus bus;
 
+        Csr csr;
+
         std::optional<uint64_t> load(uint64_t addr, uint64_t size);
 
         bool store(uint64_t addr, uint64_t size, uint64_t value);
@@ -49,7 +52,7 @@ namespace rvemu
 
         void dumpPC() const;
 
-        uint64_t getRegValueByName(const std::string &regName);
+        std::optional<uint64_t> getRegValueByName(const std::string &regName);
 
       private:
         const std::array<std::string, 32> RVABI;

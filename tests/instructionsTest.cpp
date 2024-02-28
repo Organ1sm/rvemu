@@ -5,7 +5,7 @@
 
 namespace rvemu
 {
-    TEST_CASE("RVTests-addi", "Test addi Instrucitons")
+    TEST_CASE("RVTests-addi", "Test addi Instructions")
     {
         SECTION("addi instruction with a postive immediate value")
         {
@@ -36,7 +36,7 @@ namespace rvemu
         }
     }
 
-    TEST_CASE("RVTests-slli", "Test slli Instruciton")
+    TEST_CASE("RVTests-slli", "Test slli Instruction")
     {
         std::string code = start + "addi x2, x0, 5 \n"    // load 5 into x2
                                    "slli x1, x2, 3\n";    // x1 = x2 << 3
@@ -45,7 +45,7 @@ namespace rvemu
         REQUIRE(cpu.regs[1] == (5 << 3));
     }
 
-    TEST_CASE("RVTests-slti", "Test slti Instruciton")
+    TEST_CASE("RVTests-slti", "Test slti Instruction")
     {
         SECTION("test slti instruction")
         {
@@ -76,7 +76,7 @@ namespace rvemu
         }
     }
 
-    TEST_CASE("RVTests-xori", "Test xori Instruciton")
+    TEST_CASE("RVTests-xori", "Test xori Instruction")
     {
         std::string code = start + "addi x2, x0, 15 \n"    // load 15 into x2
                                    "xori x1, x2, 7 \n";    // x1 =  x2 ^ 7
@@ -85,7 +85,7 @@ namespace rvemu
         REQUIRE(cpu.regs[1] == 8);
     }
 
-    TEST_CASE("RVTests-sri", "Test sri Instruciton")
+    TEST_CASE("RVTests-sri", "Test sri Instruction")
     {
         SECTION("test srli instruction")
         {
@@ -110,7 +110,7 @@ namespace rvemu
         }
     }
 
-    TEST_CASE("RVTests-add", "Test add Instruciton")
+    TEST_CASE("RVTests-add", "Test add Instruction")
     {
         std::string code = start + "addi x2, x0, 10 \n"    // load 10 into x2
                                    "addi x3, x0, 20 \n"    // load 20 into x3
@@ -120,7 +120,7 @@ namespace rvemu
         REQUIRE(cpu.regs[1] == 30);
     }
 
-    TEST_CASE("RVTests-ori", "Test ori Instruciton")
+    TEST_CASE("RVTests-ori", "Test ori Instruction")
     {
         std::string code = start + "addi x2, x0, 15 \n"    // load 15 into x2
                                    "ori x1, x2, 7 \n";     // x1 = x2 | 7
@@ -129,7 +129,7 @@ namespace rvemu
         REQUIRE(cpu.regs[1] == (15 | 7));
     }
 
-    TEST_CASE("RVTests-andi", "Test andi Instruciton")
+    TEST_CASE("RVTests-andi", "Test andi Instruction")
     {
         std::string code = start + "addi x2, x0, 15 \n"    // load 15 into x2
                                    "andi x1, x2, 7 \n";    // x1 = x2 & 7
@@ -139,7 +139,7 @@ namespace rvemu
     }
 
 
-    TEST_CASE("RVTests-Lui", "Test LUI Instruciton")
+    TEST_CASE("RVTests-Lui", "Test LUI Instruction")
     {
         std::string code = start + "lui a0, 42 \n";
         CPU cpu          = rvHelper(code, "test_lui", 1);
@@ -148,7 +148,7 @@ namespace rvemu
     }
 
 
-    TEST_CASE("RVTests-AUIPC", "Test AUIPC Instruciton")
+    TEST_CASE("RVTests-AUIPC", "Test AUIPC Instruction")
     {
         std::string code = start + "auipc a0, 42 \n";
         CPU cpu          = rvHelper(code, "test_auipc", 1);
@@ -157,7 +157,7 @@ namespace rvemu
     }
 
 
-    TEST_CASE("RVTests-JAL", "Test JAL Instruciton")
+    TEST_CASE("RVTests-JAL", "Test JAL Instruction")
     {
         std::string code = start + "jal a0, 42 \n";
         CPU cpu          = rvHelper(code, "test_jal", 1);
@@ -166,7 +166,7 @@ namespace rvemu
         REQUIRE(cpu.pc == DRAM_BASE + 42);
     }
 
-    TEST_CASE("RVTests-JALR", "Test JALR Instruciton")
+    TEST_CASE("RVTests-JALR", "Test JALR Instruction")
     {
         std::string code = start + "addi a1, zero, 42\n"
                                    "jalr a0, -8(a1)\n";
@@ -176,7 +176,7 @@ namespace rvemu
         REQUIRE(cpu.pc == 34);
     }
 
-    TEST_CASE("RVTests-Fence", "Test Fence Instruciton")
+    TEST_CASE("RVTests-Fence", "Test Fence Instruction")
     {
         std::string code = start + "fence\n";
         CPU cpu          = rvHelper(code, "test_fence", 1);
@@ -184,7 +184,7 @@ namespace rvemu
         REQUIRE(cpu.pc == DRAM_BASE + 4);
     }
 
-    TEST_CASE("RVTests-Slt", "Test Slt Instruciton")
+    TEST_CASE("RVTests-Slt", "Test Slt Instruction")
     {
         std::string code = start + "addi a0, zero, 14 \n"    // Load 14 into a0
                                    "addi a1, zero, 24 \n"    // Load 24 into a1
@@ -199,7 +199,7 @@ namespace rvemu
         REQUIRE(cpu.getRegValueByName("a4") == 1);
     }
 
-    TEST_CASE("RVTests-Xor", "Test xor Instruciton")
+    TEST_CASE("RVTests-Xor", "Test xor Instruction")
     {
         std::string code = start + "addi a0, zero, 0b10 \n"    // Load 0b10 into a0
                                    "xori a1, a0, 0b01 \n"      // a1 = a0 XOR 0b01
@@ -211,7 +211,7 @@ namespace rvemu
         REQUIRE(cpu.getRegValueByName("a2") == 0);
     }
 
-    TEST_CASE("RVTests-Or", "Test OR Instruciton")
+    TEST_CASE("RVTests-Or", "Test OR Instruction")
     {
         std::string code = start + "addi a0, zero, 0b10 \n"    // Load 0b10 into a0
                                    "ori  a1, a0, 0b01 \n"      // a1 = a0 OR 0b01
@@ -223,7 +223,7 @@ namespace rvemu
         REQUIRE(cpu.getRegValueByName("a2") == 0b10);
     }
 
-    TEST_CASE("RVTests-And", "Test And Instruciton")
+    TEST_CASE("RVTests-And", "Test And Instruction")
     {
         std::string code = start + "addi a0, zero, 0b10 \n"    // Load 0b10 into a0
                                    "andi a1, a0, 0b11 \n"      // a1 = a0 AND 0b11
@@ -235,7 +235,7 @@ namespace rvemu
         REQUIRE(cpu.getRegValueByName("a2") == 0b10);
     }
 
-    TEST_CASE("RVTests-Sll", "Test Sll Instruciton")
+    TEST_CASE("RVTests-Sll", "Test Sll Instruction")
     {
         std::string code = start + "addi a0, zero, 1 \n"     // Load 1 into a0
                                    "addi a1, zero, 5 \n"     // Load 5 into a1
@@ -251,7 +251,7 @@ namespace rvemu
         REQUIRE(cpu.getRegValueByName("a4") == 1);
     }
 
-    TEST_CASE("RVTests-SraSrl", "Test SraSrl Instruciton")
+    TEST_CASE("RVTests-SraSrl", "Test SraSrl Instruction")
     {
         std::string code = start + "addi a0, zero, -8; \n"    // Load -8 into a0
                                    "addi a1, zero, 1; \n"     // Load 1 into a1
@@ -268,7 +268,7 @@ namespace rvemu
         REQUIRE(cpu.getRegValueByName("a5") == static_cast<uint64_t>(-8) >> 1);
     }
 
-    TEST_CASE("RVTests-wordop", "Test word op Instruciton")
+    TEST_CASE("RVTests-wordop", "Test word op Instruction")
     {
         std::string code = start +
                            "addi a0, zero, 42 \n"    // Load 42 into a0
@@ -278,5 +278,166 @@ namespace rvemu
         CPU cpu = rvHelper(code, "test_word_op", 3);
 
         REQUIRE(cpu.getRegValueByName("a2") == 0x7f00002a);
+    }
+
+    TEST_CASE("RVTests-csrrs", "Test csr-rs instruction")
+    {
+        std::string code =
+            start +
+            "addi x2, x0, 5 \n"            // Load 5 into x2
+            "csrrs x1, mstatus, x2 \n";    // x1 = mstatus; mstatus = mstatus | x2;
+        CPU cpu = rvHelper(code, "test_csrrs", 2);
+
+        // Verify if MSTATUS register has the correct value
+        REQUIRE(cpu.getRegValueByName("mstatus") == 5);
+    }
+
+    TEST_CASE("RVTests-csrrw", "Test csr-rw Instruction")
+    {
+        SECTION("test csrrw instruction")
+        {
+            std::string code =
+                start + "addi x2, x0, 5 \n"            // Load 5 into x2
+                        "csrrw x1, mstatus, x2 \n";    // x1 = mstatus; mstatus = x2;
+            CPU cpu = rvHelper(code, "test_csrrw", 2);
+
+            REQUIRE(cpu.getRegValueByName("mstatus") == 5);
+        }
+
+        SECTION("test csrrw-complex instruction")
+        {
+            std::string code =
+                start + "addi x2, x0, 5 \n"            // Load 5 into x2
+                        "addi x3, x0, 10 \n"           // Load 10 into x3
+                        "csrrw x1, mstatus, x2 \n"     // x1 = mstatus; mstatus = x2;
+                        "csrrw x4, mstatus, x3 \n";    // x4 = mstatus; mstatus = x3;
+
+            CPU cpu = rvHelper(code, "test_csrrw_complex", 4);
+
+            // verify if x1 and x4 have the correct values
+            REQUIRE(cpu.regs[1] == 0);
+            REQUIRE(cpu.regs[4] == 5);
+
+            // verify if MSTATUS register has the correct value
+            REQUIRE(cpu.getRegValueByName("mstatus") == 10);
+        }
+    }
+
+    TEST_CASE("RVTests-csrrc", "Test csr-rc Instruction")
+    {
+        SECTION("test csrrc instruction")
+        {
+            std::string code =
+                start + "addi x2, x0, 5 \n"            // Load 5 into x2
+                        "csrrc x1, mstatus, x2 \n";    // x1 = mstatus; mstatus = x2;
+            CPU cpu = rvHelper(code, "test_csrrc", 2);
+
+            REQUIRE(cpu.getRegValueByName("mstatus") == 0);
+        }
+
+        SECTION("test csrrc-complex instruction")
+        {
+            std::string code =
+                start +
+                "addi x2, x0, 5 \n"            // Load 5 into x2
+                "addi x3, x0, 10 \n"           // Load 10 into x3
+                "csrrc x1, mstatus, x2 \n"     // x1 = mstatus; mstatus = mstatus & ~x2;
+                "csrrc x4, mstatus, x3 \n";    // x4 = mstatus; mstatus = mstatus & ~x3;
+
+            CPU cpu = rvHelper(code, "test_csrrc_complex", 4);
+
+            // verify if x1 and x4 have the correct values
+            REQUIRE(cpu.regs[1] == 0);
+            REQUIRE(cpu.regs[4] == 0);
+
+            // verify if MSTATUS register has the correct value
+            REQUIRE(cpu.getRegValueByName("mstatus") == 0);
+        }
+    }
+
+    TEST_CASE("RVTests-csrrsi", "Test csr-rsi Instruction")
+    {
+        SECTION("test csr-rsi instruction")
+        {
+            std::string code =
+                start + "csrrsi x1, mstatus, 5 \n";    // x1 = mstatus; mstatus = mstatus
+                                                       // | (1 << 5);
+            CPU cpu = rvHelper(code, "test_csrrc", 1);
+
+            REQUIRE(cpu.getRegValueByName("mstatus") == 32);
+        }
+
+        SECTION("test csr-rsi-complex instruction")
+        {
+            std::string code =
+                start + "csrrsi x1, mstatus, 5 \n"     // x1 = mstatus;
+                                                       // mstatus = mstatus | (1 << 5);
+                        "csrrsi x4, mstatus, 3 \n";    // x4 = mstatus;
+                                                       // mstatus = mstatus | (1 << 3);
+
+            CPU cpu = rvHelper(code, "test_csrrsi_complex", 2);
+
+            // verify if x1 and x4 have the correct values
+            REQUIRE(cpu.regs[1] == 0);
+            REQUIRE(cpu.regs[4] == 32);
+
+            // verify if MSTATUS register has the correct value
+            REQUIRE(cpu.getRegValueByName("mstatus") == 40);
+        }
+    }
+
+    TEST_CASE("RVTests-csrrci", "Test csr-rci Instruction")
+    {
+        SECTION("test csr-rci instruction")
+        {
+            std::string code =
+                start + "csrrci x1, mstatus, 5 \n";    // x1 = mstatus;
+                                                       // mstatus = mstatus | ~(1 << 5);
+            CPU cpu = rvHelper(code, "test_csrrc", 1);
+
+            REQUIRE(cpu.getRegValueByName("mstatus") == 0);
+        }
+
+        SECTION("test csr-rsi-complex instruction")
+        {
+            std::string code =
+                start + "csrrci x1, mstatus, 5 \n"     // x1 = mstatus;
+                                                       // mstatus = mstatus | ~(1 << 5);
+                        "csrrci x4, mstatus, 3 \n";    // x4 = mstatus;
+                                                       // mstatus = mstatus | ~(1 << 3);
+
+            CPU cpu = rvHelper(code, "test_csrrci_complex", 2);
+
+            // verify if x1 and x4 have the correct values
+            REQUIRE(cpu.regs[1] == 0);
+            REQUIRE(cpu.regs[4] == 0);
+
+            // verify if MSTATUS register has the correct value
+            REQUIRE(cpu.getRegValueByName("mstatus") == 0);
+        }
+    }
+
+    TEST_CASE("RVTests-CSRS", "Test CSRS ")
+    {
+        std::string code = start + "addi t0, zero, 1 \n"
+                                   "addi t1, zero, 2 \n"
+                                   "addi t2, zero, 3 \n"
+                                   "csrrw zero, mstatus, t0 \n"
+                                   "csrrs zero, mtvec, t1 \n"
+                                   "csrrw zero, mepc, t2 \n"
+                                   "csrrc t2, mepc, zero \n"
+                                   "csrrwi zero, sstatus, 4 \n"
+                                   "csrrsi zero, stvec, 5 \n"
+                                   "csrrwi zero, sepc, 6 \n"
+                                   "csrrci zero, sepc, 0 \n";
+
+        CPU cpu = rvHelper(code, "test_csrs1", 11);
+
+        REQUIRE(cpu.getRegValueByName("mstatus") == 1);
+        REQUIRE(cpu.getRegValueByName("mtvec") == 2);
+        REQUIRE(cpu.getRegValueByName("mepc") == 3);
+        REQUIRE(cpu.getRegValueByName("sstatus") == 0);
+        REQUIRE(cpu.getRegValueByName("stvec") == 32);
+        REQUIRE(cpu.getRegValueByName("sepc") == 6);
     }
 }    // namespace rvemu

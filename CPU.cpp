@@ -90,7 +90,7 @@ namespace rvemu
         fmt::print("{:-^100}\n", "");
     }
 
-    uint64_t CPU::getRegValueByName(const std::string &regName)
+    std::optional<uint64_t> CPU::getRegValueByName(const std::string &regName)
     {
         auto it = std::find(RVABI.begin(), RVABI.end(), regName);
         if (it != RVABI.end())
@@ -98,8 +98,45 @@ namespace rvemu
             int index = std::distance(RVABI.begin(), it);
             return regs[index];
         }
-        else
-            throw std::invalid_argument("Invalid register name: " + regName);
-    }
+        // 尝试在CSR寄存器中查找
+        if (regName == "mhartid")
+            return csr.load(MHARTID);
+        else if (regName == "mstatus")
+            return csr.load(MSTATUS);
+        else if (regName == "mtvec")
+            return csr.load(MTVEC);
+        else if (regName == "mepc")
+            return csr.load(MEPC);
+        else if (regName == "mcause")
+            return csr.load(MCAUSE);
+        else if (regName == "mtval")
+            return csr.load(MTVAL);
+        else if (regName == "medeleg")
+            return csr.load(MEDELEG);
+        else if (regName == "mscratch")
+            return csr.load(MSCRATCH);
+        else if (regName == "MIP")
+            return csr.load(MIP);
+        else if (regName == "mcounteren")
+            return csr.load(MCOUNTEREN);
+        else if (regName == "sstatus")
+            return csr.load(SSTATUS);
+        else if (regName == "stvec")
+            return csr.load(STVEC);
+        else if (regName == "sepc")
+            return csr.load(SEPC);
+        else if (regName == "scause")
+            return csr.load(SCAUSE);
+        else if (regName == "stval")
+            return csr.load(STVAL);
+        else if (regName == "sscratch")
+            return csr.load(SSCRATCH);
+        else if (regName == "SIP")
+            return csr.load(SIP);
+        else if (regName == "SATP")
+            return csr.load(SATP);
 
+        LOG(WARNING, fmt::format("Invalid name: {}", regName));
+        return std::nullopt;
+    }
 }    // namespace rvemu
