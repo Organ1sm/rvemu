@@ -45,6 +45,7 @@ int main(int argc, char *argv[])
     }
 
     cpu.dumpRegisters();
+    cpu.dumpCSRs();
     cpu.dumpPC();
 
     return 0;

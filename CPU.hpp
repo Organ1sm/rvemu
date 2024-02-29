@@ -49,7 +49,7 @@ namespace rvemu
         std::optional<uint64_t> execute(uint32_t inst);
 
         void dumpRegisters();
-
+        void dumpCSRs();
         void dumpPC() const;
 
         std::optional<uint64_t> getRegValueByName(const std::string &regName);

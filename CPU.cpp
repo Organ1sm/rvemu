@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <iterator>
 #include <optional>
+#include <string>
 #include "fmt/core.h"
 
 namespace rvemu
@@ -65,27 +66,39 @@ namespace rvemu
         return std::nullopt;
     }
 
+
+    void CPU::dumpCSRs() { this->csr.dumpCSRs(); }
+
     void CPU::dumpRegisters()
     {
-        LOG(INFO, "Dumping register state:");
-
         fmt::print("{:-^100}\n", "registers");
-        for (size_t i = 0; i < 32; i += 1)
+        std::string regFormat = "{:3}({:^4}) = {:#018x}";
+        auto outFormat        = fmt::format("{0}   {0}   {0}   {0}\n", regFormat);
+        for (size_t i = 0; i < 32; i += 4)
         {
-            fmt::print("x{}{:<6} = {:#016x} {:<3}",
-                       i,
-                       "(" + RVABI[i] + ")",
-                       regs[i],
-                       " ");
-            if ((i + 1) % 4 == 0)
-                fmt::print("\n");
+            auto i0 = fmt::format("x{}", i);
+            auto i1 = fmt::format("x{}", i + 1);
+            auto i2 = fmt::format("x{}", i + 2);
+            auto i3 = fmt::format("x{}", i + 3);
+            fmt::vprint(outFormat,
+                        fmt::make_format_args(i0,
+                                              RVABI[i],
+                                              regs[i],
+                                              i1,
+                                              RVABI[i + 1],
+                                              regs[i + 1],
+                                              i2,
+                                              RVABI[i + 2],
+                                              regs[i + 2],
+                                              i3,
+                                              RVABI[i + 3],
+                                              regs[i + 3]));
         }
     }
 
     void CPU::dumpPC() const
     {
         fmt::print("{:-^100}\n", "PC");
-        LOG(INFO, "Dumping PC register state:");
         fmt::print("PC = {:#x}\n", pc);
         fmt::print("{:-^100}\n", "");
     }

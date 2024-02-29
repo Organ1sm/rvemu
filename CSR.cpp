@@ -2,6 +2,7 @@
 #include "RVEmu.h"
 #include <cstddef>
 #include <fmt/core.h>
+#include <fmt/format.h>
 
 
 namespace rvemu
@@ -26,7 +27,20 @@ namespace rvemu
     void Csr::dumpCSRs() const
     {
         fmt::print("{:-^100}\n", "control status registers");
-        fmt::print("mstatus = {:#x}", this->load(MSTATUS));
+        fmt::print(
+            "{}\n{}\n",
+            fmt::format(
+                "mstatus = {:#018x}  mtvec = {:#018x}  mepc = {:#018x}  mcause = {:#018x}",
+                this->load(MSTATUS),
+                this->load(MTVEC),
+                this->load(MEPC),
+                this->load(MCAUSE)),
+            fmt::format(
+                "sstatus = {:#018x}  stvec = {:#018x}  sepc = {:#018x}  scause = {:#018x}",
+                this->load(SSTATUS),
+                this->load(STVEC),
+                this->load(MEPC),
+                this->load(SCAUSE)));
     }
 
     /**
@@ -77,7 +91,8 @@ namespace rvemu
                 csrs_[MIP] = (csrs_[MIE] & ~csrs_[MIDELEG]) | (value & csrs_[MIDELEG]);
                 break;
             case SSTATUS:
-                csrs_[MSTATUS] = (csrs_[MSTATUS] & ~MASK_SSTATUS) | (value & MASK_SSTATUS);
+                csrs_[MSTATUS] =
+                    (csrs_[MSTATUS] & ~MASK_SSTATUS) | (value & MASK_SSTATUS);
                 break;
             default: csrs_[addr] = value;
         }
