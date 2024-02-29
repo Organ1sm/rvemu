@@ -32,31 +32,34 @@ add_library(
 
 add_executable(rvemu main.cpp)
 
+target_link_libraries(RVEmuCore PRIVATE fmt::fmt-header-only)
+target_link_libraries(rvemu PRIVATE RVEmuCore)
+
+function(add_test_target test_name)
+    target_link_libraries(
+        ${test_name}
+        PRIVATE
+            RVEmuCore
+            Catch2::Catch2WithMain
+    )
+    catch_discover_tests(${test_name})
+endfunction()
+
 include(CTest)
 include(Catch)
 add_executable(
-    instTest
+    instsTest
     tests/testUtil.hpp
     tests/testUtil.cpp
-    tests/instructionsTest.cpp
+    tests/InstsTest.cpp
 )
-
 add_executable(csrTest tests/CSRTest.cpp)
+add_executable(cpuTest tests/CPUTest.cpp)
+add_executable(busTest tests/BUSTest.cpp)
+add_executable(dramTest tests/DRAMTest.cpp)
 
-target_link_libraries(RVEmuCore PRIVATE fmt::fmt-header-only)
-target_link_libraries(rvemu PRIVATE RVEmuCore)
-target_link_libraries(
-    instTest
-    PRIVATE
-        RVEmuCore
-        Catch2::Catch2WithMain
-)
-target_link_libraries(
-    csrTest
-    PRIVATE
-        RVEmuCore
-        Catch2::Catch2WithMain
-)
-
-catch_discover_tests(instTest)
-catch_discover_tests(csrTest)
+add_test_target(instsTest)
+add_test_target(cpuTest)
+add_test_target(busTest)
+add_test_target(csrTest)
+add_test_target(dramTest)
