@@ -72,7 +72,7 @@ namespace rvemu
     void CPU::dumpRegisters()
     {
         fmt::print("{:-^100}\n", "registers");
-        std::string regFormat = "{:3}({:^4}) = {:#018x}";
+        std::string regFormat = "{:3}({:^4}) = {:<#18x}";
         auto outFormat        = fmt::format("{0}   {0}   {0}   {0}\n", regFormat);
         for (size_t i = 0; i < 32; i += 4)
         {

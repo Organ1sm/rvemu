@@ -360,29 +360,29 @@ namespace rvemu
         SECTION("test csr-rsi instruction")
         {
             std::string code =
-                start + "csrrsi x1, mstatus, 5 \n";    // x1 = mstatus; mstatus = mstatus
-                                                       // | (1 << 5);
+                start + "csrrsi x1, mstatus, 5 \n";    // x1 = mstatus;
+                                                       // mstatus = mstatus | 5;
             CPU cpu = rvHelper(code, "test_csrrc", 1);
 
-            REQUIRE(cpu.getRegValueByName("mstatus") == 32);
+            REQUIRE(cpu.getRegValueByName("mstatus") == 5);
         }
 
         SECTION("test csr-rsi-complex instruction")
         {
-            std::string code =
-                start + "csrrsi x1, mstatus, 5 \n"     // x1 = mstatus;
-                                                       // mstatus = mstatus | (1 << 5);
-                        "csrrsi x4, mstatus, 3 \n";    // x4 = mstatus;
-                                                       // mstatus = mstatus | (1 << 3);
+            std::string code = start +
+                               "csrrsi x1, mstatus, 5 \n"     // x1 = mstatus;
+                                                              // mstatus = mstatus |  5;
+                               "csrrsi x4, mstatus, 3 \n";    // x4 = mstatus;
+                                                              // mstatus = mstatus | 3;
 
             CPU cpu = rvHelper(code, "test_csrrsi_complex", 2);
 
             // verify if x1 and x4 have the correct values
             REQUIRE(cpu.regs[1] == 0);
-            REQUIRE(cpu.regs[4] == 32);
+            REQUIRE(cpu.regs[4] == 5);
 
             // verify if MSTATUS register has the correct value
-            REQUIRE(cpu.getRegValueByName("mstatus") == 40);
+            REQUIRE(cpu.getRegValueByName("mstatus") == 7);
         }
     }
 
@@ -437,7 +437,7 @@ namespace rvemu
         REQUIRE(cpu.getRegValueByName("mtvec") == 2);
         REQUIRE(cpu.getRegValueByName("mepc") == 3);
         REQUIRE(cpu.getRegValueByName("sstatus") == 0);
-        REQUIRE(cpu.getRegValueByName("stvec") == 32);
+        REQUIRE(cpu.getRegValueByName("stvec") == 5);
         REQUIRE(cpu.getRegValueByName("sepc") == 6);
     }
 }    // namespace rvemu

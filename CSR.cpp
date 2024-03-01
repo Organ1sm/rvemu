@@ -30,13 +30,13 @@ namespace rvemu
         fmt::print(
             "{}\n{}\n",
             fmt::format(
-                "mstatus = {:#018x}  mtvec = {:#018x}  mepc = {:#018x}  mcause = {:#018x}",
+                "mstatus = {:<#18x}  mtvec = {:<#18x}  mepc = {:<#18x}  mcause = {:<#18x}",
                 this->load(MSTATUS),
                 this->load(MTVEC),
                 this->load(MEPC),
                 this->load(MCAUSE)),
             fmt::format(
-                "sstatus = {:#018x}  stvec = {:#018x}  sepc = {:#018x}  scause = {:#018x}",
+                "sstatus = {:<#18x}  stvec = {:<#18x}  sepc = {:<#18x}  scause = {:<#18x}",
                 this->load(SSTATUS),
                 this->load(STVEC),
                 this->load(MEPC),

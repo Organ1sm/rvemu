@@ -16,7 +16,6 @@ namespace rvemu
 
         uint64_t nbytes   = size / 8;
         std::size_t index = (addr - DRAM_BASE);
-
         if (index + nbytes > dram_.size())
         {
             LOG(WARNING,
@@ -29,7 +28,7 @@ namespace rvemu
         for (uint64_t i = 0; i < nbytes; i++)
             value |= static_cast<uint64_t>(dram_[index + i]) << (i * 8);
 
-        LOG(INFO, fmt::format("DRAM load successful. value: ", value));
+        LOG(INFO, fmt::format("DRAM load successful. value: {:#x} ", value));
         return value;
     }
 

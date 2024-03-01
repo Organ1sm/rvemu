@@ -38,9 +38,9 @@ namespace rvemu
     std::tuple<uint32_t, uint32_t, uint32_t> interpretInst(uint32_t inst)
     {
         return {
-            (inst >> 7) & 0x1f,     // rd
-            (inst >> 15) & 0x1f,    // rs1
-            (inst >> 20) & 0x1f,    // rs2
+            ((inst & 0x0000'0f80) >> 7) & 0x1f,     // rd
+            ((inst & 0x000f'8000) >> 15) & 0x1f,    // rs1
+            ((inst & 0x01f0'0000) >> 20) & 0x1f,    // rs2
         };
     }
 
@@ -67,7 +67,6 @@ namespace rvemu
         LOG(ERROR, "LB FAILED!");
         return std::nullopt;
     }
-
 
     std::optional<uint64_t> executeLh(CPU &cpu, uint32_t inst)
     {
@@ -177,7 +176,7 @@ namespace rvemu
         auto val = cpu.load(addr, 32);
         if (val.has_value())
         {
-            cpu.regs[rd] = val.value() & 0xffffffff;    // zero extend
+            cpu.regs[rd] = val.value() & 0xffff'ffff;    // zero extend
             return cpu.updatePC();
         }
 
@@ -187,7 +186,8 @@ namespace rvemu
 
     int64_t getStoreImm(uint32_t inst)
     {
-        return ((static_cast<int32_t>(inst & 0xfe000000) >> 20) & 0xffffffffffffffe0) |
+        return ((static_cast<int32_t>(inst & 0xfe00'0000) >> 20) &
+                0xffff'ffff'ffff'ffe0) |
                ((inst >> 7) & 0x1f);
     }
 
@@ -216,7 +216,7 @@ namespace rvemu
         int64_t imm         = getStoreImm(inst);
         uint64_t addr       = cpu.regs[rs1] + imm;
 
-        LOG(INFO, "SB: x", rd, " = x", rs1, " + ", imm, " addr: ", addr);
+        LOG(INFO, fmt::format("StoreByte: x{} = x{} + {} addr: {}", rd, rs1, imm, addr));
 
         bool isSuc = cpu.store(addr, 8, cpu.regs[rs2]);
         if (isSuc)
@@ -235,6 +235,8 @@ namespace rvemu
         int64_t imm         = getStoreImm(inst);
         uint64_t addr       = cpu.regs[rs1] + imm;
 
+        LOG(INFO, fmt::format("StoreHalf: x{} = x{} + {} addr: {}", rd, rs1, imm, addr));
+
         cpu.store(addr, 16, cpu.regs[rs2]);
         return cpu.updatePC();
     }
@@ -245,6 +247,8 @@ namespace rvemu
         int64_t imm         = getStoreImm(inst);
         uint64_t addr       = cpu.regs[rs1] + imm;
 
+        LOG(INFO, fmt::format("StoreWord: x{} = x{} + {} addr: {}", rd, rs1, imm, addr));
+
         cpu.store(addr, 32, cpu.regs[rs2]);
         return cpu.updatePC();
     }
@@ -254,6 +258,9 @@ namespace rvemu
         auto [rd, rs1, rs2] = interpretInst(inst);
         int64_t imm         = getStoreImm(inst);
         uint64_t addr       = cpu.regs[rs1] + imm;
+
+        LOG(INFO,
+            fmt::format("StoreDouble: x{} = x{} + {} addr: {}", rd, rs1, imm, addr));
 
         cpu.store(addr, 64, cpu.regs[rs2]);
         return cpu.updatePC();
@@ -680,6 +687,7 @@ namespace rvemu
         auto [rd, rs1, rs2] = interpretInst(inst);
         auto csrAddr        = (inst & 0xfff00000) >> 20;
 
+
         // Load the value from the CSR register
         uint64_t t = cpu.csr.load(csrAddr);
 
@@ -688,6 +696,8 @@ namespace rvemu
 
         // Store the original CSR value into the rd register
         cpu.regs[rd] = t;
+
+        LOG(INFO, fmt::format("CsrRW: CSRs[{}] = x{}; x{} = {}", csrAddr, rs1, rd, t));
 
         // Update the program counter
         return cpu.updatePC();
@@ -708,6 +718,9 @@ namespace rvemu
         // register value and store the result back into the CSR register
         cpu.csr.store(csrAddr, t | cpu.regs[rs1]);
 
+        LOG(INFO,
+            fmt::format("CsrRS: CSRs[{}] = {} | x{}; x{} = {}", csrAddr, t, rs1, rd, t));
+
         // Update the program counter
         return cpu.updatePC();
     }
@@ -727,6 +740,9 @@ namespace rvemu
         // NOT of the rs1 register value and store the result back into the CSR register
         cpu.csr.store(csrAddr, t & ~cpu.regs[rs1]);
 
+        LOG(INFO,
+            fmt::format("CsrRC: CSRs[{}] = {} & ~x{}; x{} = {}", csrAddr, t, rs1, rd, t));
+
         // Update the program counter
         return cpu.updatePC();
     }
@@ -743,7 +759,15 @@ namespace rvemu
         cpu.regs[rd] = t;
 
         // Set the CSR register value to the immediate value
-        cpu.csr.store(csrAddr, rs1);
+        uint64_t zimm = rs1;
+        cpu.csr.store(csrAddr, zimm);
+
+        LOG(INFO,
+            fmt::format("CsrRWI: x{} = CSRs[{}]; CSRs[{}] = {}",
+                        rd,
+                        csrAddr,
+                        csrAddr,
+                        zimm));
 
         // Update the program counter
         return cpu.updatePC();
@@ -762,7 +786,11 @@ namespace rvemu
 
         // Perform bitwise OR operation between the CSR register value and the immediate
         // value and store the result back into the CSR register
-        cpu.csr.store(csrAddr, t | (1 << rs1));
+        uint64_t zimm = rs1;
+        cpu.csr.store(csrAddr, t | rs1);
+
+        LOG(INFO,
+            fmt::format("CsrRSI: CSRs[{}] = {} | {}; x{} = {}", csrAddr, t, zimm, rd, t));
 
         // Update the program counter
         return cpu.updatePC();
@@ -771,17 +799,26 @@ namespace rvemu
     std::optional<uint64_t> executeCsrRCI(CPU &cpu, uint32_t inst)
     {
         auto [rd, rs1, rs2] = interpretInst(inst);
-        auto csr_addr       = (inst & 0xfff00000) >> 20;
+        auto csrAddr        = (inst & 0xfff00000) >> 20;
 
         // Load the value from the CSR register
-        uint64_t t = cpu.csr.load(csr_addr);
+        uint64_t t = cpu.csr.load(csrAddr);
+
+        // Perform bitwise AND operation between the CSR register value and the bitwise
+        // NOT of the immediate value and store the result back into the CSR register
+        uint64_t zimm = rs1;
+        cpu.csr.store(csrAddr, t & (~zimm));
 
         // Store the original CSR value into the rd register
         cpu.regs[rd] = t;
 
-        // Perform bitwise AND operation between the CSR register value and the bitwise
-        // NOT of the immediate value and store the result back into the CSR register
-        cpu.csr.store(csr_addr, t & ~rs1);
+        LOG(INFO,
+            fmt::format("CsrRCI: CSRs[{}] = {} & ~{}; x{} = {}",
+                        csrAddr,
+                        t,
+                        zimm,
+                        rd,
+                        t));
 
         // Update the program counter
         return cpu.updatePC();
