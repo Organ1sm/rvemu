@@ -110,16 +110,6 @@ namespace rvemu
         }
     }
 
-    TEST_CASE("RVTests-add", "Test add Instruction")
-    {
-        std::string code = start + "addi x2, x0, 10 \n"    // load 10 into x2
-                                   "addi x3, x0, 20 \n"    // load 20 into x3
-                                   "add x1, x2, x3 \n";    // x1 = x2 + x3
-
-        CPU cpu = rvHelper(code, "test_add", 3);
-        REQUIRE(cpu.regs[1] == 30);
-    }
-
     TEST_CASE("RVTests-ori", "Test ori Instruction")
     {
         std::string code = start + "addi x2, x0, 15 \n"    // load 15 into x2
@@ -184,6 +174,42 @@ namespace rvemu
         REQUIRE(cpu.pc == DRAM_BASE + 4);
     }
 
+    TEST_CASE("RVTests-add", "Test add Instruction")
+    {
+        std::string code = start + "addi x2, x0, 10 \n"    // load 10 into x2
+                                   "addi x3, x0, 20 \n"    // load 20 into x3
+                                   "add x1, x2, x3 \n";    // x1 = x2 + x3
+
+        CPU cpu = rvHelper(code, "test_add", 3);
+        REQUIRE(cpu.regs[1] == 30);
+    }
+
+    TEST_CASE("RVTests-sub", "Test sub Instruction")
+    {
+        std::string code = start + "addi a0, zero, 14 \n"    // Load 14 into a0
+                                   "addi a1, zero, 24 \n"    // Load 24 into a1
+                                   "sub  a2, a0, a1 \n";     // a2 = a0 - a1
+
+        CPU cpu = rvHelper(code, "test_sub", 3);
+
+        REQUIRE(cpu.getRegValueByName("a0") == 14);
+        REQUIRE(cpu.getRegValueByName("a1") == 24);
+        REQUIRE(cpu.getRegValueByName("a2") == -10);
+    }
+
+    TEST_CASE("RVTests-mul", "Test mul Instruction")
+    {
+        std::string code = start + "addi a0, zero, 4 \n"    // Load 14 into a0
+                                   "addi a1, zero, 2 \n"    // Load 24 into a1
+                                   "mul  a2, a0, a1 \n";    // a2 = a0 * a1
+
+        CPU cpu = rvHelper(code, "test_mul", 3);
+
+        REQUIRE(cpu.getRegValueByName("a0") == 4);
+        REQUIRE(cpu.getRegValueByName("a1") == 2);
+        REQUIRE(cpu.getRegValueByName("a2") == 8);
+    }
+
     TEST_CASE("RVTests-Slt", "Test Slt Instruction")
     {
         std::string code = start + "addi a0, zero, 14 \n"    // Load 14 into a0
@@ -197,6 +223,17 @@ namespace rvemu
         REQUIRE(cpu.getRegValueByName("a2") == 1);
         REQUIRE(cpu.getRegValueByName("a3") == 1);
         REQUIRE(cpu.getRegValueByName("a4") == 1);
+    }
+
+    TEST_CASE("RVTests-Sltu", "Test Sltu Instruction")
+    {
+        std::string code = start + "addi a0, zero, 14 \n"    // Load 14 into a0
+                                   "addi a1, zero, 24 \n"    // Load 24 into a1
+                                   "sltu a2, a0, a1 \n";     // a2 = (a0 < a1) ? 1 : 0
+
+        CPU cpu = rvHelper(code, "test_sltu", 3);
+
+        REQUIRE(cpu.getRegValueByName("a2") == 1);
     }
 
     TEST_CASE("RVTests-Xor", "Test xor Instruction")

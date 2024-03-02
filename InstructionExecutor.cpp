@@ -49,11 +49,19 @@ namespace rvemu
         return cpu.updatePC();
     }
 
+    auto calculateAddrImmWith0x03(uint32_t inst, CPU &cpu, uint32_t rs1)
+        -> std::tuple<int64_t, uint64_t>
+    {
+        int64_t imm   = static_cast<int32_t>(inst & 0xfff0'0000) >> 20;
+        uint64_t addr = cpu.regs[rs1] + imm;
+
+        return std::make_tuple(imm, addr);
+    }
+
     std::optional<uint64_t> executeLb(CPU &cpu, uint32_t inst)
     {
         auto [rd, rs1, rs2] = interpretInst(inst);
-        int64_t imm         = static_cast<int32_t>(inst & 0xfff00000) >> 20;
-        uint64_t addr       = cpu.regs[rs1] + imm;
+        auto [imm, addr]    = calculateAddrImmWith0x03(inst, cpu, rs1);
 
         LOG(INFO, fmt::format("LB: x{} = MEM[x{} + {}]", rd, rs1, imm));
 
@@ -71,8 +79,7 @@ namespace rvemu
     std::optional<uint64_t> executeLh(CPU &cpu, uint32_t inst)
     {
         auto [rd, rs1, rs2] = interpretInst(inst);
-        int64_t imm         = static_cast<int32_t>(inst & 0xfff00000) >> 20;
-        uint64_t addr       = cpu.regs[rs1] + imm;
+        auto [imm, addr]    = calculateAddrImmWith0x03(inst, cpu, rs1);
 
         LOG(INFO, fmt::format("LH: x{} = MEM[x{} + {}]", rd, rs1, imm));
 
@@ -91,8 +98,7 @@ namespace rvemu
     std::optional<uint64_t> executeLw(CPU &cpu, uint32_t inst)
     {
         auto [rd, rs1, rs2] = interpretInst(inst);
-        int64_t imm         = static_cast<int32_t>(inst & 0xfff00000) >> 20;
-        uint64_t addr       = cpu.regs[rs1] + imm;
+        auto [imm, addr]    = calculateAddrImmWith0x03(inst, cpu, rs1);
 
         LOG(INFO, fmt::format("LW: x{} = MEM[x{} + {}]", rd, rs1, imm));
 
@@ -111,8 +117,7 @@ namespace rvemu
     std::optional<uint64_t> executeLd(CPU &cpu, uint32_t inst)
     {
         auto [rd, rs1, rs2] = interpretInst(inst);
-        int64_t imm         = static_cast<int32_t>(inst & 0xfff00000) >> 20;
-        uint64_t addr       = cpu.regs[rs1] + imm;
+        auto [imm, addr]    = calculateAddrImmWith0x03(inst, cpu, rs1);
 
         LOG(INFO, fmt::format("LD: x{} = MEM[x{} + {}]", rd, rs1, imm));
 
@@ -130,8 +135,7 @@ namespace rvemu
     std::optional<uint64_t> executeLbu(CPU &cpu, uint32_t inst)
     {
         auto [rd, rs1, rs2] = interpretInst(inst);
-        int64_t imm         = static_cast<int32_t>(inst & 0xfff00000) >> 20;
-        uint64_t addr       = cpu.regs[rs1] + imm;
+        auto [imm, addr]    = calculateAddrImmWith0x03(inst, cpu, rs1);
 
         LOG(INFO, fmt::format("LBU: x{} = MEM[x{} + {}]", rd, rs1, imm));
 
@@ -149,8 +153,7 @@ namespace rvemu
     std::optional<uint64_t> executeLhu(CPU &cpu, uint32_t inst)
     {
         auto [rd, rs1, rs2] = interpretInst(inst);
-        int64_t imm         = static_cast<int32_t>(inst & 0xfff00000) >> 20;
-        uint64_t addr       = cpu.regs[rs1] + imm;
+        auto [imm, addr]    = calculateAddrImmWith0x03(inst, cpu, rs1);
 
         LOG(INFO, fmt::format("LHU: x{} = MEM[x{} + {}]", rd, rs1, imm));
 
@@ -168,8 +171,7 @@ namespace rvemu
     std::optional<uint64_t> executeLwu(CPU &cpu, uint32_t inst)
     {
         auto [rd, rs1, rs2] = interpretInst(inst);
-        int64_t imm         = static_cast<int32_t>(inst & 0xfff00000) >> 20;
-        uint64_t addr       = cpu.regs[rs1] + imm;
+        auto [imm, addr]    = calculateAddrImmWith0x03(inst, cpu, rs1);
 
         LOG(INFO, fmt::format("LWU: x{} = MEM[x{} + {}]", rd, rs1, imm));
 
@@ -406,6 +408,40 @@ namespace rvemu
         return cpu.updatePC();
     }
 
+    /// ------------------------------------------------------
+    /// ------------------- 0x33 -----------------------------
+    /// ------------------------------------------------------
+
+    std::optional<uint64_t> executeAdd(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+
+        LOG(INFO, fmt::format("ADD: x{} = x{} + x{}", rd, rs1, rs2));
+        cpu.regs[rd] = cpu.regs[rs1] + cpu.regs[rs2];
+
+        return cpu.updatePC();
+    }
+
+    std::optional<uint64_t> executeMul(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+
+        LOG(INFO, fmt::format("Mul: x{} = x{} * x{}", rd, rs1, rs2));
+        cpu.regs[rd] = cpu.regs[rs1] * cpu.regs[rs2];
+
+        return cpu.updatePC();
+    }
+
+    std::optional<uint64_t> executeSub(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+
+        LOG(INFO, fmt::format("Sub: x{} = x{} - x{}", rd, rs1, rs2));
+        cpu.regs[rd] = cpu.regs[rs1] - cpu.regs[rs2];
+
+        return cpu.updatePC();
+    }
+
     std::optional<uint64_t> executeSll(CPU &cpu, uint32_t inst)
     {
         auto [rd, rs1, rs2] = interpretInst(inst);
@@ -422,7 +458,7 @@ namespace rvemu
 
         LOG(INFO, fmt::format("SLT: x{} = (x{} < x{}) ? 1 : 0", rd, rs1, rs2));
         LOG(INFO,
-            fmt::format("Values: x{} = {}, x{} = {}",
+            fmt::format("Values: x{} => {}, x{} => {}",
                         rs1,
                         cpu.regs[rs1],
                         rs2,
@@ -435,6 +471,21 @@ namespace rvemu
         return cpu.updatePC();
     }
 
+    std::optional<uint64_t> executeSltu(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+
+        LOG(INFO,
+            fmt::format("Values: x{} => {}, x{} => {}",
+                        rs1,
+                        cpu.regs[rs1],
+                        rs2,
+                        cpu.regs[rs2]));
+        LOG(INFO, fmt::format("SLTU: x{} = (x{} < x{}) ? 1 : 0", rd, rs1, rs2));
+
+        cpu.regs[rd] = cpu.regs[rs1] < cpu.regs[rs2] ? 1 : 0;
+        return cpu.updatePC();
+    }
 
     std::optional<uint64_t> executeXor(CPU &cpu, uint32_t inst)
     {
@@ -478,7 +529,6 @@ namespace rvemu
         return cpu.updatePC();
     }
 
-
     std::optional<uint64_t> executeAnd(CPU &cpu, uint32_t inst)
     {
         auto [rd, rs1, rs2] = interpretInst(inst);
@@ -507,16 +557,6 @@ namespace rvemu
 
         LOG(INFO, fmt::format("ANDI: x{} = x{} & {}", rd, rs1, imm));
         cpu.regs[rd] = cpu.regs[rs1] & imm;
-
-        return cpu.updatePC();
-    }
-
-    std::optional<uint64_t> executeAdd(CPU &cpu, uint32_t inst)
-    {
-        auto [rd, rs1, rs2] = interpretInst(inst);
-
-        LOG(INFO, fmt::format("ADD: x{} = x{} + x{}", rd, rs1, rs2));
-        cpu.regs[rd] = cpu.regs[rs1] + cpu.regs[rs2];
 
         return cpu.updatePC();
     }
@@ -922,8 +962,11 @@ namespace rvemu
                 {std::make_tuple(0x13, 0x5, 0x00), executeSrli},
                 {std::make_tuple(0x13, 0x5, 0x20), executeSrai},
                 {std::make_tuple(0x33, 0x0, 0x00), executeAdd },
+                {std::make_tuple(0x33, 0x0, 0x01), executeMul },
+                {std::make_tuple(0x33, 0x0, 0x20), executeSub },
                 {std::make_tuple(0x33, 0x1, 0x00), executeSll },
                 {std::make_tuple(0x33, 0x2, 0x00), executeSlt },
+                {std::make_tuple(0x33, 0x3, 0x00), executeSltu},
                 {std::make_tuple(0x33, 0x4, 0x00), executeXor },
                 {std::make_tuple(0x33, 0x5, 0x00), executeSrl },
                 {std::make_tuple(0x33, 0x5, 0x20), executeSra },
