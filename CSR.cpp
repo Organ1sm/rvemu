@@ -39,7 +39,7 @@ namespace rvemu
                 "sstatus = {:<#18x}  stvec = {:<#18x}  sepc = {:<#18x}  scause = {:<#18x}",
                 this->load(SSTATUS),
                 this->load(STVEC),
-                this->load(MEPC),
+                this->load(SEPC),
                 this->load(SCAUSE)));
     }
 

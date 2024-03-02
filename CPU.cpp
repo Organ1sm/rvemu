@@ -72,7 +72,7 @@ namespace rvemu
     void CPU::dumpRegisters()
     {
         fmt::print("{:-^100}\n", "registers");
-        std::string regFormat = "{:3}({:^4}) = {:<#18x}";
+        std::string regFormat = "{:3}({:^4}) = {:#018x}";
         auto outFormat        = fmt::format("{0}   {0}   {0}   {0}\n", regFormat);
         for (size_t i = 0; i < 32; i += 4)
         {
@@ -111,7 +111,7 @@ namespace rvemu
             int index = std::distance(RVABI.begin(), it);
             return regs[index];
         }
-        // 尝试在CSR寄存器中查找
+
         if (regName == "mhartid")
             return csr.load(MHARTID);
         else if (regName == "mstatus")

@@ -25,7 +25,6 @@ int main(int argc, char *argv[])
     std::vector<uint8_t> code(std::istreambuf_iterator<char>(file), {});
     rvemu::CPU cpu(code);
 
-    cpu.dumpRegisters();
     while (true)
     {
         auto inst = cpu.fetch();
@@ -35,7 +34,6 @@ int main(int argc, char *argv[])
             break;
         }
 
-        cpu.dumpRegisters();
 
         auto newPC = cpu.execute(inst.value());
         if (!newPC.has_value())
