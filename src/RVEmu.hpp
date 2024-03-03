@@ -1,12 +1,11 @@
 #pragma once
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 
 namespace rvemu
 {
-    using InstSizeType = uint32_t;
-    using AddrType     = uint64_t;
 
     constexpr std::size_t DRAM_BASE = 0x8000'0000;
 
@@ -18,6 +17,15 @@ namespace rvemu
     constexpr size_t NUM_CSRS = 4096;    // 定义CSR的数量为4096
 
     constexpr uint8_t RegistersNumber = 32;
+
+    using InstSizeType     = uint32_t;
+    using AddrType         = uint64_t;
+    using RegisterSizeType = uint64_t;
+    using RegType          = std::array<RegisterSizeType, RegistersNumber>;
+
+    enum RegisterIndex : std::size_t { Zero = 0, RA = 1, SP = 2 };
+
+    enum DataSizeType { Byte = 1, HalfWord = 2, Word = 4, DoubleWord = 8 };
 
     // 机器级别的CSR
     constexpr size_t MHARTID    = 0xf14;    // 硬件线程ID
