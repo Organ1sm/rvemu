@@ -49,10 +49,16 @@ namespace rvemu
         return cpu.updatePC();
     }
 
-    auto calculateAddrImmWith0x03(uint32_t inst, CPU &cpu, uint32_t rs1)
-        -> std::tuple<int64_t, uint64_t>
+    uint64_t calculateImm(uint32_t inst, uint32_t mask = 0xfff0'0000)
     {
-        int64_t imm   = static_cast<int32_t>(inst & 0xfff0'0000) >> 20;
+        uint64_t imm = static_cast<int64_t>(static_cast<int32_t>(inst & mask)) >> 20;
+        return imm;
+    }
+
+    auto calculateAddrImmWith0x03(uint32_t inst, CPU &cpu, uint32_t rs1)
+        -> std::tuple<uint64_t, uint64_t>
+    {
+        auto imm      = calculateImm(inst);
         uint64_t addr = cpu.regs[rs1] + imm;
 
         return std::make_tuple(imm, addr);
@@ -316,10 +322,13 @@ namespace rvemu
         return cpu.updatePC();
     }
 
-    std::optional<uint64_t> executeAddI(CPU &cpu, uint32_t inst)
+    /// ------------------------------------------------------
+    /// ------------------- 0x13 -----------------------------
+    /// ------------------------------------------------------
+    std::optional<uint64_t> executeAddi(CPU &cpu, uint32_t inst)
     {
         auto [rd, rs1, rs2] = interpretInst(inst);
-        int64_t imm         = static_cast<int32_t>(inst & 0xfff00000) >> 20;
+        uint64_t imm        = calculateImm(inst);
 
         LOG(INFO, fmt::format("ADDI: x{} = x{} + {}", rd, rs1, imm));
         cpu.regs[rd] = cpu.regs[rs1] + imm;
@@ -330,7 +339,7 @@ namespace rvemu
     std::optional<uint64_t> executeSlli(CPU &cpu, uint32_t inst)
     {
         auto [rd, rs1, rs2] = interpretInst(inst);
-        int64_t imm         = static_cast<int32_t>(inst & 0xfff00000) >> 20;
+        uint64_t imm        = calculateImm(inst);
 
         LOG(INFO, fmt::format("SLLI: x{} = x{} << {}", rd, rs1, (imm & 0x3f)));
         cpu.regs[rd] = cpu.regs[rs1] << (imm & 0x3f);
@@ -342,7 +351,7 @@ namespace rvemu
     std::optional<uint64_t> executeSlti(CPU &cpu, uint32_t inst)
     {
         auto [rd, rs1, rs2] = interpretInst(inst);
-        int64_t imm         = static_cast<int32_t>(inst & 0xfff00000) >> 20;
+        uint64_t imm        = calculateImm(inst);
 
         LOG(INFO, fmt::format("SLTI: x{} = (x{} < {}) ? 1 : 0", rd, rs1, (imm & 0x3f)));
         cpu.regs[rd] = (cpu.regs[rs1] < static_cast<uint64_t>(imm)) ? 1 : 0;
@@ -354,7 +363,7 @@ namespace rvemu
     std::optional<uint64_t> executeSltiu(CPU &cpu, uint32_t inst)
     {
         auto [rd, rs1, rs2] = interpretInst(inst);
-        int64_t imm         = static_cast<int32_t>(inst & 0xfff00000) >> 20;
+        uint64_t imm        = calculateImm(inst);
 
         LOG(INFO, fmt::format("SLTIU: x{} = (x{} < {}) ? 1 : 0", rd, rs1, (imm & 0x3f)));
         cpu.regs[rd] = (cpu.regs[rs1] < static_cast<unsigned int>(imm)) ? 1 : 0;
@@ -365,7 +374,7 @@ namespace rvemu
     std::optional<uint64_t> executeXori(CPU &cpu, uint32_t inst)
     {
         auto [rd, rs1, rs2] = interpretInst(inst);
-        int64_t imm         = static_cast<int32_t>(inst & 0xfff00000) >> 20;
+        uint64_t imm        = calculateImm(inst);
 
         LOG(INFO, fmt::format("XORI: x{} = x{} ^ {}", rd, rs1, (imm & 0x3f)));
         cpu.regs[rd] = cpu.regs[rs1] ^ imm;
@@ -376,7 +385,7 @@ namespace rvemu
     std::optional<uint64_t> executeSrli(CPU &cpu, uint32_t inst)
     {
         auto [rd, rs1, rs2] = interpretInst(inst);
-        int64_t imm         = (static_cast<int32_t>(inst & 0xfff00000) >> 20);
+        uint64_t imm        = calculateImm(inst);
 
         // "The shift amount is encoded in the lower 6 bits of the I-immediate field for
         // RV64I."
@@ -391,7 +400,7 @@ namespace rvemu
     std::optional<uint64_t> executeSrai(CPU &cpu, uint32_t inst)
     {
         auto [rd, rs1, rs2] = interpretInst(inst);
-        uint64_t imm        = static_cast<int32_t>(inst & 0xfff00000) >> 20;
+        uint64_t imm        = calculateImm(inst);
 
         // 在 I 类型指令中，immediate 字段（I-immediate field）通常用来表示一个立即数，
         // 而对于右移类指令，如算术右移指令（srai），这个立即数的低6位通常用来表示右移的位数。
@@ -405,6 +414,83 @@ namespace rvemu
         cpu.regs[rd] =
             static_cast<uint64_t>(static_cast<int64_t>(cpu.regs[rs1]) >> shamt);
 
+        return cpu.updatePC();
+    }
+
+    std::optional<uint64_t> executeOri(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+        uint64_t imm        = calculateImm(inst);
+
+        LOG(INFO, fmt::format("ORI: x{} = x{} | {}", rd, rs1, imm));
+        cpu.regs[rd] = cpu.regs[rs1] | imm;
+
+        return cpu.updatePC();
+    }
+
+    std::optional<uint64_t> executeAndi(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+        uint64_t imm        = calculateImm(inst);
+
+        LOG(INFO, fmt::format("ANDI: x{} = x{} & {}", rd, rs1, imm));
+        cpu.regs[rd] = cpu.regs[rs1] & imm;
+
+        return cpu.updatePC();
+    }
+
+
+    /// ------------------------------------------------------
+    /// ------------------- 0x17 -----------------------------
+    /// ------------------------------------------------------
+
+    std::optional<uint64_t> executeAUIPC(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+        uint64_t imm        = calculateImm(inst, 0xffff'f000);
+
+        LOG(INFO, fmt::format("AUIPC: x{} = pc + {}", rd, imm));
+
+        cpu.regs[rd] = cpu.pc + imm;
+        return cpu.updatePC();
+    }
+
+    /// ------------------------------------------------------
+    /// ------------------- 0x1b -----------------------------
+    /// ------------------------------------------------------
+
+    std::optional<uint64_t> executeAddiw(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+        uint64_t imm        = calculateImm(inst);
+
+        LOG(INFO, fmt::format("Addiw: x{} = x{} + {}", rd, rs1, imm));
+
+        cpu.regs[rd] = cpu.regs[rs1] + imm;
+        return cpu.updatePC();
+    }
+
+    std::optional<uint64_t> executeSlliw(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+        uint32_t shamt      = calculateImm(inst) & 0x1f;
+
+        LOG(INFO, fmt::format("SLLIW: x{} = x{} << {}", rd, rs1, shamt));
+
+        cpu.regs[rd] = cpu.regs[rs1] << shamt;
+        return cpu.updatePC();
+    }
+
+
+    std::optional<uint64_t> executeSrliw(CPU &cpu, uint32_t inst)
+    {
+        auto [rd, rs1, rs2] = interpretInst(inst);
+        uint32_t shamt      = calculateImm(inst) & 0x1f;
+
+        LOG(INFO, fmt::format("SLLIW: x{} = x{} << {}", rd, rs1, shamt));
+
+        auto result  = (static_cast<uint32_t>(cpu.regs[rs1]) << shamt);
+        cpu.regs[rd] = result;
         return cpu.updatePC();
     }
 
@@ -539,29 +625,6 @@ namespace rvemu
         return cpu.updatePC();
     }
 
-    std::optional<uint64_t> executeOri(CPU &cpu, uint32_t inst)
-    {
-        auto [rd, rs1, rs2] = interpretInst(inst);
-        int64_t imm         = static_cast<int32_t>(inst & 0xfff00000) >> 20;
-
-        LOG(INFO, fmt::format("ORI: x{} = x{} | {}", rd, rs1, imm));
-        cpu.regs[rd] = cpu.regs[rs1] | imm;
-
-        return cpu.updatePC();
-    }
-
-    std::optional<uint64_t> executeAndi(CPU &cpu, uint32_t inst)
-    {
-        auto [rd, rs1, rs2] = interpretInst(inst);
-        int64_t imm         = static_cast<int32_t>(inst & 0xfff00000) >> 20;
-
-        LOG(INFO, fmt::format("ANDI: x{} = x{} & {}", rd, rs1, imm));
-        cpu.regs[rd] = cpu.regs[rs1] & imm;
-
-        return cpu.updatePC();
-    }
-
-
     std::optional<uint64_t> executeLui(CPU &cpu, uint32_t inst)
     {
         auto [rd, rs1, rs2] = interpretInst(inst);
@@ -571,17 +634,6 @@ namespace rvemu
         LOG(INFO, fmt::format("LUI: x{} = {}", rd, imm));
 
         cpu.regs[rd] = imm;
-        return cpu.updatePC();
-    }
-
-    std::optional<uint64_t> executeAUIPC(CPU &cpu, uint32_t inst)
-    {
-        auto [rd, rs1, rs2] = interpretInst(inst);
-        int64_t imm         = static_cast<int32_t>(inst & 0xfffff000);
-
-        LOG(INFO, fmt::format("AUIPC: x{} = pc + {}", rd, imm));
-
-        cpu.regs[rd] = cpu.pc + imm;
         return cpu.updatePC();
     }
 
@@ -596,7 +648,6 @@ namespace rvemu
         cpu.regs[rd] = cpu.pc + 4;
         return cpu.pc + imm;
     }
-
 
     std::optional<uint64_t> executeJALR(CPU &cpu, uint32_t inst)
     {
@@ -907,7 +958,9 @@ namespace rvemu
 
         LOG(INFO, fmt::format("funct3: {:#x}", funct3));
 
-        std::unordered_map<std::tuple<uint32_t, uint32_t>, ExecuteFunction>
+        std::unordered_map<std::tuple<uint32_t,     // opcode
+                                      uint32_t>,    // funct3
+                           ExecuteFunction>
             instructionMap = {
                 {std::make_tuple(0x03, 0x0), executeLb         },
                 {std::make_tuple(0x03, 0x1), executeLh         },
@@ -917,13 +970,18 @@ namespace rvemu
                 {std::make_tuple(0x03, 0x5), executeLhu        },
                 {std::make_tuple(0x03, 0x6), executeLwu        },
                 {std::make_tuple(0x0f, 0x0), executeFence      },
-                {std::make_tuple(0x13, 0x0), executeAddI       },
+
+                {std::make_tuple(0x13, 0x0), executeAddi       },
                 {std::make_tuple(0x13, 0x1), executeSlli       },
                 {std::make_tuple(0x13, 0x2), executeSlti       },
                 {std::make_tuple(0x13, 0x3), executeSltiu      },
                 {std::make_tuple(0x13, 0x4), executeXori       },
                 {std::make_tuple(0x13, 0x6), executeOri        },
                 {std::make_tuple(0x13, 0x7), executeAndi       },
+
+                {std::make_tuple(0x1b, 0x0), executeAddiw      },
+                {std::make_tuple(0x1b, 0x0), executeSlliw      },
+
                 {std::make_tuple(0x19, 0x7), executeSb         },
                 {std::make_tuple(0x23, 0x0), executeStoreByte  },
                 {std::make_tuple(0x23, 0x3), executeStoreDouble},
@@ -957,22 +1015,28 @@ namespace rvemu
 
         LOG(INFO, fmt::format("funct7: {:#x}", funct7));
 
-        std::unordered_map<std::tuple<uint32_t, uint32_t, uint32_t>, ExecuteFunction>
+        std::unordered_map<std::tuple<uint32_t,     // opcode
+                                      uint32_t,     // funct3
+                                      uint32_t>,    // func7
+                           ExecuteFunction>
             instruction2Map = {
-                {std::make_tuple(0x13, 0x5, 0x00), executeSrli},
-                {std::make_tuple(0x13, 0x5, 0x20), executeSrai},
-                {std::make_tuple(0x33, 0x0, 0x00), executeAdd },
-                {std::make_tuple(0x33, 0x0, 0x01), executeMul },
-                {std::make_tuple(0x33, 0x0, 0x20), executeSub },
-                {std::make_tuple(0x33, 0x1, 0x00), executeSll },
-                {std::make_tuple(0x33, 0x2, 0x00), executeSlt },
-                {std::make_tuple(0x33, 0x3, 0x00), executeSltu},
-                {std::make_tuple(0x33, 0x4, 0x00), executeXor },
-                {std::make_tuple(0x33, 0x5, 0x00), executeSrl },
-                {std::make_tuple(0x33, 0x5, 0x20), executeSra },
-                {std::make_tuple(0x33, 0x6, 0x00), executeOr  },
-                {std::make_tuple(0x33, 0x7, 0x00), executeAnd },
-                {std::make_tuple(0x3b, 0x0, 0x00), executeAddW},
+                {std::make_tuple(0x13, 0x5, 0x00), executeSrli },
+                {std::make_tuple(0x13, 0x5, 0x20), executeSrai },
+
+                {std::make_tuple(0x1b, 0x5, 0x00), executeSrliw},
+
+                {std::make_tuple(0x33, 0x0, 0x00), executeAdd  },
+                {std::make_tuple(0x33, 0x0, 0x01), executeMul  },
+                {std::make_tuple(0x33, 0x0, 0x20), executeSub  },
+                {std::make_tuple(0x33, 0x1, 0x00), executeSll  },
+                {std::make_tuple(0x33, 0x2, 0x00), executeSlt  },
+                {std::make_tuple(0x33, 0x3, 0x00), executeSltu },
+                {std::make_tuple(0x33, 0x4, 0x00), executeXor  },
+                {std::make_tuple(0x33, 0x5, 0x00), executeSrl  },
+                {std::make_tuple(0x33, 0x5, 0x20), executeSra  },
+                {std::make_tuple(0x33, 0x6, 0x00), executeOr   },
+                {std::make_tuple(0x33, 0x7, 0x00), executeAnd  },
+                {std::make_tuple(0x3b, 0x0, 0x00), executeAddW },
         };
 
         LOG(INFO, fmt::format("Executing srli or srai funct7: {:#x}", funct7));
