@@ -1,8 +1,12 @@
 #include "Iformat.hpp"
+
 #include "../BitsManipulation.hpp"
+#include "../Memory.hpp"
 #include "../Registers.hpp"
 #include "InstFormat.hpp"
+
 #include <cstdint>
+#include <iostream>
 
 namespace rvemu
 {
@@ -30,8 +34,8 @@ namespace rvemu
 
     void ImmOp::slti()
     {
-        if (static_cast<int32_t>(rs_) <
-            static_cast<int32_t>(BitsManipulation::extendSign(offset_, 11)))
+        if (static_cast<int32_t>(rs_)
+            < static_cast<int32_t>(BitsManipulation::extendSign(offset_, 11)))
         {
             rd_ = 1;
         }
@@ -82,8 +86,67 @@ namespace rvemu
         rd_                    = arith(rs_, op, shamt);
     }
 
-    void ImmOp::execution() {}
+    void ImmOp::execution()
+    {
+        switch (func3_)
+        {
+            case Func3Type::Addi:  addi(); break;
+            case Func3Type::Slti:  slti(); break;
+            case Func3Type::Sltiu: sltiu(); break;
+            case Func3Type::Xori:  xori(); break;
+            case Func3Type::Ori:   ori(); break;
+            case Func3Type::Andi:  andi(); break;
+            case Func3Type::Slli:  slli(); break;
 
-    void ImmOp::printInstruction(std::string const &is_name, std::string const &op) {}
+            case Func3Type::SrliOrSrai: {
+                if (BitsManipulation::takeBits(inst_, 30, 31) == 0)
+                    srli();
+                if (BitsManipulation::takeBits(inst_, 30, 31) == 1)
+                    srai();
+                break;
+            }
 
+            default: {
+                std::cerr << "Error: input no matching cases\n";
+                abort();
+            }
+        }
+    }
+
+    void ImmOp::printInstruction(const std::string &is_name, const std::string &op) { }
+
+    void Load::execution() { m_ad_to_read = rs_ + offset_; }
+
+    void Load::accessMemory(SystemInterface &bus)
+    {
+        assert(func3_ <= 5);
+        DataSizeType sz;
+        if (func3_ == 0 || func3_ == 4)
+            sz = Byte;
+        else if (func3_ == 1 || func3_ == 5)
+            sz = HalfWord;
+        else if (func3_ == 2)
+            sz = Word;
+        else
+        {
+            std::cerr << "Invalid func3 in load instruction\n";
+            abort();
+        }
+        rd_ = bus.readData(m_ad_to_read, sz);
+
+        if (func3_ <= 2)
+            rd_ = BitsManipulation::extendSign(rd_, (1 << (func3_ + 3)) - 1);
+    }
+
+    // Jris
+    void Jris::execution() { rd_ = currPC_ + DataSizeType::Word; }
+
+    // NOTE: the least significant bit is not set to zero,
+    // as happens with branch or jump, because Jris instructions
+    // belongs to the I-format
+    AddrType Jris::moveNextInst()
+    {
+        AddrType next_instruction = (rs_ + offset_) & (~1);    // set last digit to 0
+        return next_instruction;
+    }
 }    // namespace rvemu

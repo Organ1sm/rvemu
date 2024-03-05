@@ -3,12 +3,12 @@
 #include "Bus.hpp"
 #include "CSR.hpp"
 #include "RVEmu.h"
+
 #include <array>
 #include <cstdint>
 #include <optional>
 #include <string>
 #include <vector>
-
 
 namespace rvemu
 {
@@ -16,17 +16,16 @@ namespace rvemu
     {
       public:
         CPU(std::vector<uint8_t> &code)
-            : pc(DRAM_BASE), bus(code), csr(),
-              RVABI {
-                  "zero", "ra", "sp", "gp", "tp",  "t0",  "t1", "t2", "s0", "s1", "a0",
-                  "a1",   "a2", "a3", "a4", "a5",  "a6",  "a7", "s2", "s3", "s4", "s5",
-                  "s6",   "s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6",
-              }
+          : pc(DRAM_BASE), bus(code), csr(),
+            RVABI {
+              "zero", "ra", "sp", "gp", "tp",  "t0",  "t1", "t2", "s0", "s1", "a0",
+              "a1",   "a2", "a3", "a4", "a5",  "a6",  "a7", "s2", "s3", "s4", "s5",
+              "s6",   "s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6",
+            }
         {
             regs.fill(0);    // initialize the regs value to 0
             regs[2] = DRAM_END;
         }
-
 
         // PC register
         uint64_t pc;

@@ -1,23 +1,25 @@
 #include "InstFormat.hpp"
+
 #include "../Registers.hpp"
+
 #include <iostream>
 
 // Default functions that each instruction format will override
 namespace rvemu
 {
-    void InstructionFormat::readRegister(const Registers &) {}
+    void InstructionFormat::readRegister(const Registers &) { }
 
-    void InstructionFormat::readCSR(CSRInterface const &) {}
+    void InstructionFormat::readCsr(const CSRInterface &) { }
 
-    void InstructionFormat::accessMemory(SystemInterface &) {}
+    void InstructionFormat::accessMemory(SystemInterface &) { }
 
-    void InstructionFormat::writeCsr(CSRInterface &) {}
+    void InstructionFormat::writeCsr(CSRInterface &) { }
 
-    void InstructionFormat::writeBack(Registers &) {}
+    void InstructionFormat::writeBack(Registers &) { }
 
     AddrType InstructionFormat::moveNextInst() { return currPC_ + DataSizeType::Word; }
 
-    std::string InstructionFormat::printRegIndex(std::size_t const reg_ind)
+    std::string InstructionFormat::printRegIndex(const std::size_t reg_ind)
     {
         return "x" + std::to_string(reg_ind) + "(" + Registers::getABIName(reg_ind) + ")";
     }

@@ -30,7 +30,55 @@ add_library(
     CSR.cpp
 )
 
+set(instsHeaders
+    src/instructions/InstFormat.hpp
+    src/instructions/Iformat.hpp
+)
+
+set(componentsHeaders
+    src/BitsManipulation.hpp
+    src/Cpu.hpp
+    src/Csr.hpp
+    src/Emulator.hpp
+    src/Memory.hpp
+    src/RVEmu.hpp
+    src/Registers.hpp
+)
+
+# To show up headers in IDE we need to make a target.
+add_library(
+    EmulatorHeaders
+    INTERFACE
+        ${componentsHeaders}
+        ${instsHeaders}
+)
+
+set(instructions
+    src/instructions/InstFormat.cpp
+    src/instructions/Iformat.cpp
+)
+
+set(components
+    src/BitsManipulation.cpp
+    src/Cpu.cpp
+    src/Csr.cpp
+    src/Emulator.cpp
+    src/Memory.cpp
+    src/Registers.cpp
+)
+
+add_library(
+    emulator
+    STATIC
+    ${instructions}
+    ${components}
+)
+
 add_executable(rvemu main.cpp)
+add_executable(newRVEMU src/main.cpp)
+
+target_link_libraries(emulator PUBLIC EmulatorHeaders)
+target_link_libraries(newRVEMU emulator)
 
 target_link_libraries(RVEmuCore PRIVATE fmt::fmt-header-only)
 target_link_libraries(rvemu PRIVATE RVEmuCore)

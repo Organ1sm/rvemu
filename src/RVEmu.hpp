@@ -14,14 +14,18 @@ namespace rvemu
 
     constexpr std::size_t DRAM_END = DRAM_BASE + DRAM_SIZE - 1;
 
-    constexpr size_t NUM_CSRS = 4096;    // 定义CSR的数量为4096
+    constexpr uint16_t NUM_CSRS = 4096;
 
     constexpr uint8_t RegistersNumber = 32;
 
-    using InstSizeType     = uint32_t;
-    using AddrType         = uint64_t;
-    using RegisterSizeType = uint64_t;
-    using RegType          = std::array<RegisterSizeType, RegistersNumber>;
+    constexpr uint8_t LAST_OPCODE_DIGIT = 6;
+    constexpr uint8_t OPCODE_LEN        = 7;
+
+    using InstSizeType        = uint32_t;
+    using AddrType            = uint64_t;
+    using RegisterSizeType    = uint64_t;
+    using CSRRegisterSizeType = uint64_t;
+    using RegType             = std::array<RegisterSizeType, RegistersNumber>;
 
     enum RegisterIndex : std::size_t { Zero = 0, RA = 1, SP = 2 };
 
@@ -53,30 +57,30 @@ namespace rvemu
     constexpr size_t SATP     = 0x180;    // 监管地址转换和保护
 
     // mstatus 和 sstatus 字段掩码
-    constexpr uint64_t MASK_SIE     = 1 << 1;        // 监管中断使能掩码
-    constexpr uint64_t MASK_MIE     = 1 << 3;        // 机器中断使能掩码
-    constexpr uint64_t MASK_SPIE    = 1 << 5;        // 上一次监管中断使能掩码
-    constexpr uint64_t MASK_UBE     = 1 << 6;        // 用户模式字节顺序掩码
-    constexpr uint64_t MASK_MPIE    = 1 << 7;        // 上一次机器中断使能掩码
-    constexpr uint64_t MASK_SPP     = 1 << 8;        // 上一次监管权限模式掩码
-    constexpr uint64_t MASK_VS      = 0b11 << 9;     // 虚拟化状态掩码
-    constexpr uint64_t MASK_MPP     = 0b11 << 11;    // 上一次机器权限模式掩码
-    constexpr uint64_t MASK_FS      = 0b11 << 13;    // 浮点单元状态掩码
-    constexpr uint64_t MASK_XS      = 0b11 << 15;    // 用户扩展状态掩码
-    constexpr uint64_t MASK_MPRV    = 1 << 17;       // 内存保护寄存器掩码
-    constexpr uint64_t MASK_SUM     = 1 << 18;       // 监管用户内存访问掩码
-    constexpr uint64_t MASK_MXR     = 1 << 19;       // 内存扩展寄存器掩码
-    constexpr uint64_t MASK_TVM     = 1 << 20;       // 虚拟化内存掩码
-    constexpr uint64_t MASK_TW      = 1 << 21;       // 虚拟化等待掩码
-    constexpr uint64_t MASK_TSR     = 1 << 22;       // 虚拟化SR掩码
+    constexpr uint64_t MASK_SIE     = 1 << 1;           // 监管中断使能掩码
+    constexpr uint64_t MASK_MIE     = 1 << 3;           // 机器中断使能掩码
+    constexpr uint64_t MASK_SPIE    = 1 << 5;           // 上一次监管中断使能掩码
+    constexpr uint64_t MASK_UBE     = 1 << 6;           // 用户模式字节顺序掩码
+    constexpr uint64_t MASK_MPIE    = 1 << 7;           // 上一次机器中断使能掩码
+    constexpr uint64_t MASK_SPP     = 1 << 8;           // 上一次监管权限模式掩码
+    constexpr uint64_t MASK_VS      = 0b11 << 9;        // 虚拟化状态掩码
+    constexpr uint64_t MASK_MPP     = 0b11 << 11;       // 上一次机器权限模式掩码
+    constexpr uint64_t MASK_FS      = 0b11 << 13;       // 浮点单元状态掩码
+    constexpr uint64_t MASK_XS      = 0b11 << 15;       // 用户扩展状态掩码
+    constexpr uint64_t MASK_MPRV    = 1 << 17;          // 内存保护寄存器掩码
+    constexpr uint64_t MASK_SUM     = 1 << 18;          // 监管用户内存访问掩码
+    constexpr uint64_t MASK_MXR     = 1 << 19;          // 内存扩展寄存器掩码
+    constexpr uint64_t MASK_TVM     = 1 << 20;          // 虚拟化内存掩码
+    constexpr uint64_t MASK_TW      = 1 << 21;          // 虚拟化等待掩码
+    constexpr uint64_t MASK_TSR     = 1 << 22;          // 虚拟化SR掩码
     constexpr uint64_t MASK_UXL     = 0b11ULL << 32;    // 用户地址长度掩码
     constexpr uint64_t MASK_SXL     = 0b11ULL << 34;    // 监管地址长度掩码
     constexpr uint64_t MASK_SBE     = 1ULL << 36;       // 监管错误掩码
     constexpr uint64_t MASK_MBE     = 1ULL << 37;       // 机器错误掩码
     constexpr uint64_t MASK_SD      = 1ULL << 63;       // 状态脏掩码
-    constexpr uint64_t MASK_SSTATUS = MASK_SIE | MASK_SPIE | MASK_UBE | MASK_SPP |
-                                      MASK_FS | MASK_XS | MASK_SUM | MASK_MXR | MASK_UXL |
-                                      MASK_SD;    // 监管状态寄存器掩码
+    constexpr uint64_t MASK_SSTATUS = MASK_SIE | MASK_SPIE | MASK_UBE | MASK_SPP | MASK_FS
+                                      | MASK_XS | MASK_SUM | MASK_MXR | MASK_UXL
+                                      | MASK_SD;        // 监管状态寄存器掩码
 
     // MIP / SIP 字段掩码
     constexpr uint64_t MASK_SSIP = 1 << 1;     // 监管软件中断挂起掩码
