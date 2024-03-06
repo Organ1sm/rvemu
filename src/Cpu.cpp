@@ -6,6 +6,8 @@
 #include "instructions/InstFormat.hpp"
 #include "instructions/Rformat.hpp"
 
+#include <fmt/core.h>
+
 namespace rvemu
 {
     CPU::CPU(const std::string &fileName) : pc_(DRAM_BASE), bus_ {fileName}
@@ -61,6 +63,9 @@ namespace rvemu
                 std::cout << "Exception in write back stage: " << wb_exception << std::endl;
                 break;
             }
+
+            dumpRegisters();
+            dumpPC();
         }
     }
 
@@ -114,6 +119,47 @@ namespace rvemu
     InstSizeType CPU::moveNextInst(const std::unique_ptr<InstructionFormat> &instFormat)
     {
         return instFormat->moveNextInst();
+    }
+
+    void CPU::dumpRegisters()
+    {
+        fmt::print("{:-^100}\n", "registers");
+        std::string regFormat = "{:3}({:^4}) = {:#018x}";
+        auto outFormat        = fmt::format("{0}   {0}   {0}   {0}\n", regFormat);
+        for (size_t i = 0; i < 32; i += 4)
+        {
+            auto i0 = fmt::format("x{}", i);
+            auto i1 = fmt::format("x{}", i + 1);
+            auto i2 = fmt::format("x{}", i + 2);
+            auto i3 = fmt::format("x{}", i + 3);
+            auto v0 = registers_.read(i);
+            auto v1 = registers_.read(i + 1);
+            auto v2 = registers_.read(i + 2);
+            auto v3 = registers_.read(i + 3);
+            fmt::vprint(outFormat,
+                        fmt::make_format_args(i0,
+                                              Registers::RVABI[i],
+                                              v0,
+
+                                              i1,
+                                              Registers::RVABI[i + 1],
+                                              v1,
+
+                                              i2,
+                                              Registers::RVABI[i + 2],
+                                              v2,
+
+                                              i3,
+                                              Registers::RVABI[i + 3],
+                                              v3));
+        }
+    }
+
+    void CPU::dumpPC() const
+    {
+        fmt::print("{:-^100}\n", "PC");
+        fmt::print("PC = {:#x}\n", pc_);
+        fmt::print("{:-^100}\n", "");
     }
 
 }    // namespace rvemu

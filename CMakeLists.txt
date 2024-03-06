@@ -79,7 +79,12 @@ add_library(
 add_executable(rvemu main.cpp)
 add_executable(newRVEMU src/main.cpp)
 
-target_link_libraries(emulator PUBLIC EmulatorHeaders)
+target_link_libraries(
+    emulator
+    PUBLIC
+        EmulatorHeaders
+        fmt::fmt-header-only
+)
 target_link_libraries(newRVEMU emulator)
 
 target_link_libraries(RVEmuCore PRIVATE fmt::fmt-header-only)

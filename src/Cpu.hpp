@@ -5,7 +5,6 @@
 #include "RVEmu.hpp"
 #include "Registers.hpp"
 
-#include <cstdint>
 #include <memory>
 #include <string>
 
@@ -22,6 +21,9 @@ namespace rvemu
         bool checkEndProgram() { return pc_ >= lastInstAddr_; }
 
         u32 getCurrentInstruction() { return pc_; }
+
+        void dumpRegisters();
+        void dumpPC() const;
 
       private:
         enum class OpcodeType : u8 {
