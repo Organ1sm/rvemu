@@ -82,6 +82,7 @@ namespace rvemu
             case OpcodeType::Jalr:  instFormat = std::make_unique<Jris>(inst, pc_); break;
             case OpcodeType::Immop: instFormat = std::make_unique<ImmOp>(inst, pc_); break;
             case OpcodeType::Op:    instFormat = std::make_unique<Op>(inst, pc_); break;
+    
 
             default: {
                 std::cerr << "No opcode matches\n";

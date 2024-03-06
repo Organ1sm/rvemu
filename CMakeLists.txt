@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.27)
 project(rvemu)
 
 set(CMAKE_CXX_STANDARD 23)
+add_link_options("-fuse-ld=mold")
 
 find_package(fmt)
 
