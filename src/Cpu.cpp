@@ -2,11 +2,13 @@
 
 #include "BitsManipulation.hpp"
 #include "RVEmu.hpp"
+#include "instructions/Fence.hpp"
 #include "instructions/Iformat.hpp"
 #include "instructions/InstFormat.hpp"
 #include "instructions/Rformat.hpp"
 
 #include <fmt/core.h>
+#include <memory>
 
 namespace rvemu
 {
@@ -82,7 +84,7 @@ namespace rvemu
             case OpcodeType::Jalr:  instFormat = std::make_unique<Jris>(inst, pc_); break;
             case OpcodeType::Immop: instFormat = std::make_unique<ImmOp>(inst, pc_); break;
             case OpcodeType::Op:    instFormat = std::make_unique<Op>(inst, pc_); break;
-    
+            case OpcodeType::Fence: instFormat = std::make_unique<Fence>(inst, pc_); break;
 
             default: {
                 std::cerr << "No opcode matches\n";

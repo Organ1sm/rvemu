@@ -35,6 +35,7 @@ set(instsHeaders
     src/instructions/InstFormat.hpp
     src/instructions/Iformat.hpp
     src/instructions/Rformat.hpp
+    src/instructions/Fence.hpp
 )
 
 set(componentsHeaders
@@ -84,6 +85,7 @@ target_link_libraries(
     emulator
     PUBLIC
         EmulatorHeaders
+    PRIVATE
         fmt::fmt-header-only
 )
 target_link_libraries(newRVEMU emulator)
