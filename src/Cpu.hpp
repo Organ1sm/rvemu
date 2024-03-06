@@ -21,10 +21,10 @@ namespace rvemu
 
         bool checkEndProgram() { return pc_ >= lastInstAddr_; }
 
-        uint32_t getCurrentInstruction() { return pc_; }
+        u32 getCurrentInstruction() { return pc_; }
 
       private:
-        enum class OpcodeType : uint8_t {
+        enum class OpcodeType : u8 {
             Lui    = 0b011'0111,    // load upper immediate lui
             Auipc  = 0b001'0111,
             Jal    = 0b110'1111,

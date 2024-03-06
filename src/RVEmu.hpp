@@ -6,7 +6,6 @@
 
 namespace rvemu
 {
-
     constexpr std::size_t DRAM_BASE = 0x8000'0000;
 
     // define the size of DRAM => 128MB
@@ -20,6 +19,11 @@ namespace rvemu
 
     constexpr uint8_t LAST_OPCODE_DIGIT = 6;
     constexpr uint8_t OPCODE_LEN        = 7;
+
+    using u8  = uint8_t;
+    using u32 = uint32_t;
+    using u64 = uint64_t;
+    using i64 = int64_t;
 
     using InstSizeType        = uint32_t;
     using AddrType            = uint64_t;

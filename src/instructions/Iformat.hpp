@@ -20,13 +20,13 @@ namespace rvemu
         std::size_t takeRegS();
         std::size_t takeRegD();
         RegisterSizeType takeOffset();
-        uint8_t takeFunc3();
+        u8 takeFunc3();
 
       protected:
         std::size_t rsIdx_;
         std::size_t rdIdx_;
         RegisterSizeType offset_;
-        uint8_t func3_;
+        u8 func3_;
 
         RegisterSizeType rs_;
         RegisterSizeType rd_;
@@ -37,7 +37,7 @@ namespace rvemu
       private:
         // There are two duplicated func3 for which we need additional
         // info: the two last bits of the immediate.
-        enum class Func3Type : uint8_t {
+        enum class Func3Type : u8 {
             Addi       = 0b000,
             Slli       = 0b001,
             Slti       = 0b010,

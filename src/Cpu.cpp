@@ -16,7 +16,7 @@ namespace rvemu
     {
         while (!checkEndProgram())
         {
-            uint32_t inst = fetch();
+            u32 inst = fetch();
 
             std::unique_ptr<InstructionFormat> instFormat = nullptr;
             try
@@ -68,7 +68,7 @@ namespace rvemu
     std::unique_ptr<InstructionFormat> CPU::decode(const InstSizeType inst)
     {
         std::unique_ptr<InstructionFormat> instFormat = nullptr;
-        uint8_t opcode = BitsManipulation::takeBits(inst, 0, LAST_OPCODE_DIGIT);
+        u8 opcode = BitsManipulation::takeBits(inst, 0, LAST_OPCODE_DIGIT);
 
         auto op = static_cast<OpcodeType>(opcode);
         switch (op)

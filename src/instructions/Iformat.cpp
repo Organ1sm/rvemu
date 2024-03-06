@@ -20,7 +20,7 @@ namespace rvemu
         return BitsManipulation::extendSign(offset, 11);
     }
 
-    uint8_t I::takeFunc3() { return BitsManipulation::takeBits(inst_, 12, 14); }
+    u8 I::takeFunc3() { return BitsManipulation::takeBits(inst_, 12, 14); }
 
     void I::readRegister(const Registers &regs) { rs_ = regs.read(rsIdx_); }
 
