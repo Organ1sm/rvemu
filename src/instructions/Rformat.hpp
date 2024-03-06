@@ -28,8 +28,8 @@ namespace rvemu
         };
 
         R(const InstSizeType is, const AddrType pc)
-          : InstructionFormat(is, pc), m_index_rs1(takeRegS1()), m_index_rs2(takeRegS2()),
-            m_index_rd(takeRegD()), m_id(takeId())
+          : InstructionFormat(is, pc), rs1Idx_(takeRegS1()), rs2Idx_(takeRegS2()),
+            rdIdx_(takeRegD()), type(takeId())
         { }
 
       protected:
@@ -38,14 +38,14 @@ namespace rvemu
         size_t takeRegD();
         Type takeId();
 
-        size_t m_index_rs1;
-        size_t m_index_rs2;
-        size_t m_index_rd;
-        Type m_id;
+        size_t rs1Idx_;
+        size_t rs2Idx_;
+        size_t rdIdx_;
+        Type type;
 
-        RegisterSizeType m_rs1;
-        RegisterSizeType m_rs2;
-        RegisterSizeType m_rd;
+        RegisterSizeType rs1_;
+        RegisterSizeType rs2_;
+        RegisterSizeType rd_;
     };
 
     class Op : public R

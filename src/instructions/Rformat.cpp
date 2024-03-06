@@ -22,75 +22,75 @@ namespace rvemu
 
     void R::readRegister(const Registers &reg)
     {
-        m_rs1 = reg.read(m_index_rs1);
-        m_rs2 = reg.read(m_index_rs2);
+        rs1_ = reg.read(rs1Idx_);
+        rs2_ = reg.read(rs2Idx_);
     }
 
-    void R::writeBack(Registers &regs) { regs.write(m_index_rd, m_rd); }
+    void R::writeBack(Registers &regs) { regs.write(rdIdx_, rd_); }
 
     void Op::add()
     {
         std::string op = "+";
-        m_rd           = arith(m_rs1, op, m_rs2);
+        rd_            = arith(rs1_, op, rs2_);
     }
 
     void Op::sub()
     {
         std::string op = "-";
-        m_rd           = arith(m_rs1, op, m_rs2);
+        rd_            = arith(rs1_, op, rs2_);
     }
 
     void Op::sll()
     {
         std::string op       = "<<";
-        auto lower_five_bits = BitsManipulation::takeBits(m_rs2, 0, 4);
-        m_rd                 = arith(m_rs1, op, lower_five_bits);
+        auto lower_five_bits = BitsManipulation::takeBits(rs2_, 0, 4);
+        rd_                  = arith(rs1_, op, lower_five_bits);
     }
 
     void Op::slt()
     {
         std::string op = "<<";
-        if (static_cast<int32_t>(m_rs1) < static_cast<int32_t>(m_rs2))
-            m_rd = 1;
+        if (static_cast<int32_t>(rs1_) < static_cast<int32_t>(rs2_))
+            rd_ = 1;
         else
-            m_rd = 0;
+            rd_ = 0;
     }
 
-    void Op::sltu() { m_rd = m_rs1 < m_rs2 ? 1 : 0; }
+    void Op::sltu() { rd_ = rs1_ < rs2_ ? 1 : 0; }
 
     void Op::xorop()
     {
         std::string op = "^";
-        m_rd           = arith(m_rs1, op, m_rs2);
+        rd_            = arith(rs1_, op, rs2_);
     }
 
     void Op::srl()
     {
         std::string op = ">>L";
-        m_rd           = arith(m_rs1, op, BitsManipulation::takeBits(m_rs2, 0, 4));
+        rd_            = arith(rs1_, op, BitsManipulation::takeBits(rs2_, 0, 4));
     }
 
     void Op::sra()
     {
         std::string op = ">>A";
-        m_rd           = arith(m_rs1, op, BitsManipulation::takeBits(m_rs2, 0, 4));
+        rd_            = arith(rs1_, op, BitsManipulation::takeBits(rs2_, 0, 4));
     }
 
     void Op::orop()
     {
         std::string op = "|";
-        m_rd           = arith(m_rs1, op, m_rs2);
+        rd_            = arith(rs1_, op, rs2_);
     }
 
     void Op::andop()
     {
         std::string op = "&";
-        m_rd           = arith(m_rs1, op, m_rs2);
+        rd_            = arith(rs1_, op, rs2_);
     }
 
     void Op::execution()
     {
-        switch (m_id)
+        switch (type)
         {
             case Type::Add:  add(); break;
             case Type::Sub:  sub(); break;
@@ -112,9 +112,8 @@ namespace rvemu
 
     void Op::printInstruction(const std::string &is_name, const std::string &op)
     {
-        std::cout << is_name << " " << printRegIndex(m_index_rd) << " = "
-                  << printRegIndex(m_index_rs1) << " " << op << " " << printRegIndex(m_index_rs2)
-                  << std::endl;
+        std::cout << is_name << " " << printRegIndex(rdIdx_) << " = " << printRegIndex(rs1Idx_)
+                  << " " << op << " " << printRegIndex(rs2Idx_) << std::endl;
     }
 
 
