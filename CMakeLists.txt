@@ -33,6 +33,7 @@ add_library(
 set(instsHeaders
     src/instructions/InstFormat.hpp
     src/instructions/Iformat.hpp
+    src/instructions/Rformat.hpp
 )
 
 set(componentsHeaders
@@ -56,6 +57,7 @@ add_library(
 set(instructions
     src/instructions/InstFormat.cpp
     src/instructions/Iformat.cpp
+    src/instructions/Rformat.cpp
 )
 
 set(components

@@ -4,6 +4,7 @@
 #include "RVEmu.hpp"
 #include "instructions/Iformat.hpp"
 #include "instructions/InstFormat.hpp"
+#include "instructions/Rformat.hpp"
 
 namespace rvemu
 {
@@ -75,6 +76,7 @@ namespace rvemu
         {
             case OpcodeType::Jalr:  instFormat = std::make_unique<Jris>(inst, pc_); break;
             case OpcodeType::Immop: instFormat = std::make_unique<ImmOp>(inst, pc_); break;
+            case OpcodeType::Op:    instFormat = std::make_unique<Op>(inst, pc_); break;
 
             default: {
                 std::cerr << "No opcode matches\n";
@@ -84,13 +86,13 @@ namespace rvemu
         return instFormat;
     }
 
-    void CPU::execute(const std::unique_ptr<InstructionFormat> &is_format)
+    void CPU::execute(const std::unique_ptr<InstructionFormat> &instFormat)
     {
-        is_format->readRegister(registers_);
-        is_format->readCsr(csrs_);
+        instFormat->readRegister(registers_);
+        instFormat->readCsr(csrs_);
         try
         {
-            is_format->execution();
+            instFormat->execution();
         }
         catch (const char *exc)
         {
