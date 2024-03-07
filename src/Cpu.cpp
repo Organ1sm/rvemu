@@ -6,6 +6,7 @@
 #include "instructions/Iformat.hpp"
 #include "instructions/InstFormat.hpp"
 #include "instructions/Rformat.hpp"
+#include "instructions/Uformat.hpp"
 
 #include <fmt/core.h>
 #include <memory>
@@ -81,6 +82,8 @@ namespace rvemu
         auto op = static_cast<OpcodeType>(opcode);
         switch (op)
         {
+            case OpcodeType::Lui:   instFormat = std::make_unique<Lui>(inst, pc_); break;
+            case OpcodeType::Auipc: instFormat = std::make_unique<Auipc>(inst, pc_); break;
             case OpcodeType::Jalr:  instFormat = std::make_unique<Jris>(inst, pc_); break;
             case OpcodeType::Immop: instFormat = std::make_unique<ImmOp>(inst, pc_); break;
             case OpcodeType::Op:    instFormat = std::make_unique<Op>(inst, pc_); break;
