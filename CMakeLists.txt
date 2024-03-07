@@ -37,6 +37,8 @@ set(instsHeaders
     src/instructions/Rformat.hpp
     src/instructions/Uformat.hpp
     src/instructions/Fence.hpp
+    src/instructions/Load.hpp
+    src/instructions/Store.hpp
 )
 
 set(componentsHeaders
@@ -62,6 +64,9 @@ set(instructions
     src/instructions/Iformat.cpp
     src/instructions/Rformat.cpp
     src/instructions/Uformat.cpp
+    src/instructions/Uformat.cpp
+    src/instructions/Store.cpp
+    src/instructions/Load.cpp
 )
 
 set(components

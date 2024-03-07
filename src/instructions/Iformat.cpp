@@ -1,7 +1,6 @@
 #include "Iformat.hpp"
 
 #include "../BitsManipulation.hpp"
-#include "../Memory.hpp"
 #include "../Registers.hpp"
 #include "InstFormat.hpp"
 
@@ -114,29 +113,6 @@ namespace rvemu
     }
 
     void ImmOp::printInstruction(const std::string &is_name, const std::string &op) { }
-
-    void Load::execution() { m_ad_to_read = rs_ + offset_; }
-
-    void Load::accessMemory(SystemInterface &bus)
-    {
-        assert(func3_ <= 5);
-        DataSizeType sz;
-        if (func3_ == 0 || func3_ == 4)
-            sz = Byte;
-        else if (func3_ == 1 || func3_ == 5)
-            sz = HalfWord;
-        else if (func3_ == 2)
-            sz = Word;
-        else
-        {
-            std::cerr << "Invalid func3 in load instruction\n";
-            abort();
-        }
-        rd_ = bus.readData(m_ad_to_read, sz);
-
-        if (func3_ <= 2)
-            rd_ = BitsManipulation::extendSign(rd_, (1 << (func3_ + 3)) - 1);
-    }
 
     // Jris
     void Jris::execution() { rd_ = currPC_ + DataSizeType::Word; }

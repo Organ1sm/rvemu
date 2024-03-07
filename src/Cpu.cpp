@@ -5,7 +5,9 @@
 #include "instructions/Fence.hpp"
 #include "instructions/Iformat.hpp"
 #include "instructions/InstFormat.hpp"
+#include "instructions/Load.hpp"
 #include "instructions/Rformat.hpp"
+#include "instructions/Store.hpp"
 #include "instructions/Uformat.hpp"
 
 #include <fmt/core.h>
@@ -85,6 +87,8 @@ namespace rvemu
             case OpcodeType::Lui:   instFormat = std::make_unique<Lui>(inst, pc_); break;
             case OpcodeType::Auipc: instFormat = std::make_unique<Auipc>(inst, pc_); break;
             case OpcodeType::Jalr:  instFormat = std::make_unique<Jris>(inst, pc_); break;
+            case OpcodeType::Load:  instFormat = std::make_unique<Load>(inst, pc_); break;
+            case OpcodeType::Store: instFormat = std::make_unique<Store>(inst, pc_); break;
             case OpcodeType::Immop: instFormat = std::make_unique<ImmOp>(inst, pc_); break;
             case OpcodeType::Op:    instFormat = std::make_unique<Op>(inst, pc_); break;
             case OpcodeType::Fence: instFormat = std::make_unique<Fence>(inst, pc_); break;

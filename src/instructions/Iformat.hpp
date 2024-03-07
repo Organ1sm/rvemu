@@ -79,16 +79,4 @@ namespace rvemu
       private:
         RegisterSizeType m_reg;
     };
-
-    class Load : public I
-    {
-      public:
-        Load(const InstSizeType is, const AddrType pc) : I(is, pc) { }
-
-        void execution() override;
-        void accessMemory(SystemInterface &) override;
-
-      private:
-        AddrType m_ad_to_read;
-    };
 }    // namespace rvemu
