@@ -2,9 +2,11 @@
 
 #include "BitsManipulation.hpp"
 #include "RVEmu.hpp"
+#include "instructions/Branch.hpp"
 #include "instructions/Fence.hpp"
 #include "instructions/Iformat.hpp"
 #include "instructions/InstFormat.hpp"
+#include "instructions/Jformat.hpp"
 #include "instructions/Load.hpp"
 #include "instructions/Rformat.hpp"
 #include "instructions/Store.hpp"
@@ -84,14 +86,16 @@ namespace rvemu
         auto op = static_cast<OpcodeType>(opcode);
         switch (op)
         {
-            case OpcodeType::Lui:   instFormat = std::make_unique<Lui>(inst, pc_); break;
-            case OpcodeType::Auipc: instFormat = std::make_unique<Auipc>(inst, pc_); break;
-            case OpcodeType::Jalr:  instFormat = std::make_unique<Jris>(inst, pc_); break;
-            case OpcodeType::Load:  instFormat = std::make_unique<Load>(inst, pc_); break;
-            case OpcodeType::Store: instFormat = std::make_unique<Store>(inst, pc_); break;
-            case OpcodeType::Immop: instFormat = std::make_unique<ImmOp>(inst, pc_); break;
-            case OpcodeType::Op:    instFormat = std::make_unique<Op>(inst, pc_); break;
-            case OpcodeType::Fence: instFormat = std::make_unique<Fence>(inst, pc_); break;
+            case OpcodeType::Lui:    instFormat = std::make_unique<Lui>(inst, pc_); break;
+            case OpcodeType::Auipc:  instFormat = std::make_unique<Auipc>(inst, pc_); break;
+            case OpcodeType::Jalr:   instFormat = std::make_unique<Jris>(inst, pc_); break;
+            case OpcodeType::Jal:    instFormat = std::make_unique<Jal>(inst, pc_); break;
+            case OpcodeType::Load:   instFormat = std::make_unique<Load>(inst, pc_); break;
+            case OpcodeType::Store:  instFormat = std::make_unique<Store>(inst, pc_); break;
+            case OpcodeType::Branch: instFormat = std::make_unique<Branch>(inst, pc_); break;
+            case OpcodeType::Immop:  instFormat = std::make_unique<ImmOp>(inst, pc_); break;
+            case OpcodeType::Op:     instFormat = std::make_unique<Op>(inst, pc_); break;
+            case OpcodeType::Fence:  instFormat = std::make_unique<Fence>(inst, pc_); break;
 
             default: {
                 std::cerr << "No opcode matches\n";
