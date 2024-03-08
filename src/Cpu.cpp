@@ -10,6 +10,7 @@
 #include "instructions/Load.hpp"
 #include "instructions/Rformat.hpp"
 #include "instructions/Store.hpp"
+#include "instructions/System.hpp"
 #include "instructions/Uformat.hpp"
 
 #include <fmt/core.h>
@@ -96,6 +97,12 @@ namespace rvemu
             case OpcodeType::Immop:  instFormat = std::make_unique<ImmOp>(inst, pc_); break;
             case OpcodeType::Op:     instFormat = std::make_unique<Op>(inst, pc_); break;
             case OpcodeType::Fence:  instFormat = std::make_unique<Fence>(inst, pc_); break;
+            case OpcodeType::System: {
+                u8 func3 = BitsManipulation::takeBits(inst, 12, 14);
+                if (func3 != 0)
+                    instFormat = std::make_unique<CSR>(inst, pc_);
+                break;
+            }
 
             default: {
                 std::cerr << "No opcode matches\n";

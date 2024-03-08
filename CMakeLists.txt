@@ -41,6 +41,7 @@ set(instsHeaders
     src/instructions/Load.hpp
     src/instructions/Store.hpp
     src/instructions/Branch.hpp
+    src/instructions/System.hpp
 )
 
 set(componentsHeaders
@@ -70,6 +71,7 @@ set(instructions
     src/instructions/Store.cpp
     src/instructions/Load.cpp
     src/instructions/Branch.cpp
+    src/instructions/System.cpp
 )
 
 set(components
