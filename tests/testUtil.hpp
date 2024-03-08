@@ -1,7 +1,8 @@
 #pragma once
 
+#include "../src/Cpu.hpp"
+
 #include <string>
-#include "../CPU.hpp"
 
 namespace rvemu
 {
@@ -10,8 +11,6 @@ namespace rvemu
     void generateRVAssembly(const std::string &csrc);
     void generateRVObj(const std::string &assembly);
     void generateRVBinary(const std::string &obj);
-    CPU rvHelper(const std::string &code,
-                 const std::string &testname,
-                 std::size_t nclock);
+    const CPU &rvHelper(const std::string &code, const std::string &testname, std::size_t nclock);
 
 }    // namespace rvemu

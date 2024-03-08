@@ -10,6 +10,8 @@ namespace rvemu
         Emulator(const std::string &);
         void runEmulator();
 
+        const CPU &getCPU() { return cpu_; }
+
       private:
         CPU cpu_;
     };

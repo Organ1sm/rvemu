@@ -13,7 +13,9 @@
 #include "instructions/System.hpp"
 #include "instructions/Uformat.hpp"
 
+#include <algorithm>
 #include <fmt/core.h>
+#include <iterator>
 #include <memory>
 
 namespace rvemu
@@ -21,6 +23,17 @@ namespace rvemu
     CPU::CPU(const std::string &fileName) : pc_(DRAM_BASE), bus_ {fileName}
     {
         lastInstAddr_ = bus_.getLastInstr();
+    }
+
+    std::optional<u64> CPU::getRegValueByName(const std::string &name)
+    {
+        auto it = std::find(Registers::RVABI.cbegin(), Registers::RVABI.cend(), name);
+        if (it != Registers::RVABI.cend())
+        {
+            auto index = std::distance(Registers::RVABI.cbegin(), it);
+            return registers_.read(index);
+        }
+        return std::nullopt;
     }
 
     void CPU::steps()

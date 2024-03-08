@@ -6,6 +6,7 @@
 #include "Registers.hpp"
 
 #include <memory>
+#include <optional>
 #include <string>
 
 namespace rvemu
@@ -20,7 +21,11 @@ namespace rvemu
 
         bool checkEndProgram() { return pc_ >= lastInstAddr_; }
 
-        u32 getCurrentInstruction() { return pc_; }
+        u32 getCurrInst() { return pc_; }
+
+        const Registers &getRegs() const { return registers_; }
+
+        std::optional<u64> getRegValueByName(const std::string &name);
 
         void dumpRegisters();
         void dumpPC() const;
