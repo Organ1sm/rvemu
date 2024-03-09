@@ -34,7 +34,7 @@ namespace rvemu
         RegisterSizeType readData(AddrType, DataSizeType);
         void writeData(AddrType, RegisterSizeType, DataSizeType);
 
-        RegisterSizeType getLastInstr() { return m_last_instruction; }
+        RegisterSizeType getLastInstr() { return lastInst_; }
 #ifdef DEB_BIN_INS
       private:
         void printCode();
@@ -45,7 +45,7 @@ namespace rvemu
         bool validWrite(AddrType);
 
       private:
-        DRAM m_memory;
-        AddrType m_last_instruction;
+        DRAM memory_;
+        AddrType lastInst_;
     };
 }    // namespace rvemu

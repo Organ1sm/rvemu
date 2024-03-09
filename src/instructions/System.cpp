@@ -10,7 +10,7 @@ namespace rvemu
 {
     std::size_t System::takeRd() { return BitsManipulation::takeBits(inst_, 7, 11); }
 
-    uint8_t System::takeQty() { return BitsManipulation::takeBits(inst_, 15, 19); }
+    u8 System::takeQty() { return BitsManipulation::takeBits(inst_, 15, 19); }
 
     System::Func3Type System::takeFunc3()
     {
@@ -35,7 +35,7 @@ namespace rvemu
         {
             writeToReg_ = false;
         }
-        if (static_cast<uint8_t>(func3_) >= 5)
+        if (static_cast<u8>(func3_) < 5)
         {
             secondOperand_ = reg.read(secondOperand_);
         }
@@ -67,11 +67,11 @@ namespace rvemu
         {
             return secondOperand_;
         }
-        else if (func3_ == System::Func3Type::Csrrs || func3_ == System::Func3Type::Srrsi)
+        else if (func3_ == System::Func3Type::Csrrs || func3_ == System::Func3Type::Csrrsi)
         {
             return arith(csrRS_, "|", secondOperand_);
         }
-        else if (func3_ == System::Func3Type::Srrc || func3_ == System::Func3Type::Csrrci)
+        else if (func3_ == System::Func3Type::Csrrc || func3_ == System::Func3Type::Csrrci)
         {
             return arith(csrRS_, "&", !secondOperand_);
         }

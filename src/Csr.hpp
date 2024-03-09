@@ -2,6 +2,9 @@
 
 #include "RVEmu.hpp"
 
+#include <string>
+#include <unordered_map>
+
 namespace rvemu
 {
     class CSRInterface
@@ -11,6 +14,11 @@ namespace rvemu
 
         void write(AddrType, RegisterSizeType);
         RegisterSizeType read(AddrType) const;
+
+        void dumpCSRs() const;
+
+      public:
+        static const std::unordered_map<std::string, std::size_t> csrAddrs_;
 
       private:
         bool checkLimit(AddrType a) const { return a < NUM_CSRS; }

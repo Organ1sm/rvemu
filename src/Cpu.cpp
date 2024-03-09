@@ -1,6 +1,7 @@
 #include "Cpu.hpp"
 
 #include "BitsManipulation.hpp"
+#include "Csr.hpp"
 #include "RVEmu.hpp"
 #include "instructions/Branch.hpp"
 #include "instructions/Fence.hpp"
@@ -33,6 +34,11 @@ namespace rvemu
             auto index = std::distance(Registers::RVABI.cbegin(), it);
             return registers_.read(index);
         }
+
+        auto mIt = CSRInterface::csrAddrs_.find(name);
+        if (mIt != CSRInterface::csrAddrs_.cend())
+            return csrs_.read(mIt->second);
+
         return std::nullopt;
     }
 
@@ -86,6 +92,7 @@ namespace rvemu
             }
 
             dumpRegisters();
+            dumpCSRs();
             dumpPC();
         }
     }
@@ -188,6 +195,8 @@ namespace rvemu
                                               v3));
         }
     }
+
+    void CPU::dumpCSRs() const { this->csrs_.dumpCSRs(); }
 
     void CPU::dumpPC() const
     {

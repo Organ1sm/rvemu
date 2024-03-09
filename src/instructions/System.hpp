@@ -17,9 +17,9 @@ namespace rvemu
             Ebreak = 0b000,
             Csrrw  = 0b001,
             Csrrs  = 0b010,
-            Srrc   = 0b011,
+            Csrrc  = 0b011,
             Csrrwi = 0b101,
-            Srrsi  = 0b110,
+            Csrrsi = 0b110,
             Csrrci = 0b111
         };
 

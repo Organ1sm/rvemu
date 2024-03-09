@@ -11,7 +11,7 @@
 // Therefore 1100-0001 is stored as 0x0: 0001 0x1: 1100
 namespace rvemu
 {
-    SystemInterface::SystemInterface(const std::string &fileName) : m_last_instruction {0}
+    SystemInterface::SystemInterface(const std::string &fileName) : lastInst_ {0}
     {
         loadCode(fileName);
     }
@@ -31,10 +31,10 @@ namespace rvemu
         unsigned char b;
         while (input_file.read(reinterpret_cast<char *>(&b), Byte))
         {
-            m_memory.write(instAddr, b, Byte);
+            memory_.write(instAddr, b, Byte);
             instAddr += Byte;
         }
-        m_last_instruction = instAddr;
+        lastInst_ = instAddr;
     }
 
     std::ostream &operator<< (std::ostream &os, std::byte b)
@@ -98,14 +98,14 @@ namespace rvemu
         {
             handleAlignmentEx();
         }
-        return m_memory.read(read_from, sz);
+        return memory_.read(read_from, sz);
         throw("Invalid read location\n");
         abort();
     }
 
     bool SystemInterface::validWrite(AddrType write_to)
     {
-        return m_last_instruction <= write_to && write_to < (DRAM_BASE + DRAM_SIZE);
+        return lastInst_ <= write_to && write_to < (DRAM_BASE + DRAM_SIZE);
     }
 
     void
@@ -116,7 +116,7 @@ namespace rvemu
         {
             handleAlignmentEx();
         }
-        return m_memory.write(write_to, what_write, sz);
+        return memory_.write(write_to, what_write, sz);
         throw("Invalid write location\n");
         abort();
     }

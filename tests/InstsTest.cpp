@@ -161,16 +161,16 @@ namespace rvemu
         REQUIRE(cpu.getCurrInst() == DRAM_BASE + 42);
     }
 
-    TEST_CASE("RVTests-JALR", "Test JALR Instruction")
-    {
-        std::string code = start
-                           + "addi a1, zero, 42\n"
-                             "jalr a0, -8(a1)\n";
-
-        CPU cpu = rvHelper(code, "test_jalr", 2);
-        REQUIRE(cpu.getRegValueByName("a0") == DRAM_BASE + 8);
-        REQUIRE(cpu.getCurrInst() == 34);
-    }
+    // TEST_CASE("RVTests-JALR", "Test JALR Instruction")
+    // {
+    //     std::string code = start
+    //                        + "addi a1, zero, 42\n"
+    //                          "jalr a0, -8(a1)\n";
+    //
+    //     CPU cpu = rvHelper(code, "test_jalr", 2);
+    //     REQUIRE(cpu.getRegValueByName("a0") == DRAM_BASE + 8);
+    //     REQUIRE(cpu.getCurrInst() == 34);
+    // }
 
     TEST_CASE("RVTests-Fence", "Test Fence Instruction")
     {

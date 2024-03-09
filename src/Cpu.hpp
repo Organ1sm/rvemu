@@ -28,6 +28,7 @@ namespace rvemu
         std::optional<u64> getRegValueByName(const std::string &name);
 
         void dumpRegisters();
+        void dumpCSRs() const;
         void dumpPC() const;
 
       private:
