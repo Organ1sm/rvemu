@@ -1,4 +1,6 @@
 out/*
+.cache/*
+build/*
 # Prerequisites
 *.d
 

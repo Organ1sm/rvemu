@@ -11,15 +11,33 @@ namespace rvemu
 
     std::size_t Branch::takeRs2() { return BitsManipulation::takeBits(inst_, 20, 24); }
 
+    /**
+     * @brief Extract the offset for a branch instruction.
+     *
+     * This method constructs the branch offset from various bits of the instruction.
+     * It uses the BitsManipulation utility to extract the relevant bits and then
+     * assembles them into the offset. The offset is sign-extended to match the
+     * correct value for branching.
+     *
+     * @return The sign-extended offset for the branch instruction.
+     */
     AddrType Branch::takeOffset()
     {
-        const uint8_t last_digit = 12;
+        const u8 lastDigit = 12;    // The bit position for sign extension.
+
+        // Initialize the offset variable.
         AddrType of {0};
-        of = BitsManipulation::takeBits(inst_, 8, 11) << 1
-             | BitsManipulation::takeBits(inst_, 25, 30) << 5
-             | BitsManipulation::takeBits(inst_, 7, 7) << 11
-             | BitsManipulation::takeBits(inst_, 31, 31) << 12;
-        return BitsManipulation::extendSign(of, last_digit);
+
+        // Construct the offset from the instruction bits.
+        of = BitsManipulation::takeBits(inst_, 8, 11) << 1    // Bits 8-11 are shifted left by 1.
+             | BitsManipulation::takeBits(inst_, 25, 30)
+                   << 5                                       // Bits 25-30 are shifted left by 5.
+             | BitsManipulation::takeBits(inst_, 7, 7) << 11    // Bit 7 is shifted left by 11.
+             | BitsManipulation::takeBits(inst_, 31, 31)
+                   << 12;                                       // Bit 31 is shifted left by 12.
+
+        // Return the sign-extended offset.
+        return BitsManipulation::extendSign(of, lastDigit);
     }
 
     Branch::Func3Type Branch::takeFunc3()

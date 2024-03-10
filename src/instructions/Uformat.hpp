@@ -4,6 +4,14 @@
 
 namespace rvemu
 {
+
+    ///
+    /// 31                                 12 11     7 6         0
+    /// +------------------------------------+--------+----------+
+    /// |              imm[31:12]            |   rd   |  opcode  | U-type
+    /// +------------------------------------+--------+----------+
+    ///                   20                     5         7
+    ///
     class U : public InstructionFormat
     {
       public:
@@ -22,6 +30,7 @@ namespace rvemu
         RegisterSizeType rd_;
     };
 
+    /// AUIPC - Add Upper Immediate to pc
     class Auipc : public U
     {
       public:
@@ -30,6 +39,7 @@ namespace rvemu
         void execution() override;
     };
 
+    /// LUI - Load Upper Immediate
     class Lui : public U
     {
       public:

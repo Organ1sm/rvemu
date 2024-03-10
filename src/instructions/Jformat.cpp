@@ -9,15 +9,16 @@ namespace rvemu
     {
         u8 pos = 20;
 
-        auto value = BitsManipulation::takeBits(inst_, 21, 30) << 1    // implicit shift done here
-                     | BitsManipulation::takeBits(inst_, 20, 20) << 11
-                     | BitsManipulation::takeBits(inst_, 12, 19) << 12
-                     | BitsManipulation::takeBits(inst_, 31, 31) << 20;
+        auto offset = BitsManipulation::takeBits(inst_, 21, 30)
+                          << 1    // implicit shift done here
+                      | BitsManipulation::takeBits(inst_, 20, 20) << 11
+                      | BitsManipulation::takeBits(inst_, 12, 19) << 12
+                      | BitsManipulation::takeBits(inst_, 31, 31) << 20;
 
-        return BitsManipulation::extendSign(value, pos);
+        return BitsManipulation::extendSign(offset, pos);
     }
 
-    std::size_t Jal::takeIndexRd() { return BitsManipulation::takeBits(inst_, 7, 11); }
+    std::size_t Jal::takeRd() { return BitsManipulation::takeBits(inst_, 7, 11); }
 
     void Jal::execution() { }
 

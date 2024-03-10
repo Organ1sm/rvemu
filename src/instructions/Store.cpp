@@ -26,16 +26,15 @@ namespace rvemu
         bus.writeData(addrToWrite, rs2_, DataSizeType(1 << (func3_)));
     }
 
-    size_t Store::takeRS1Idx() { return BitsManipulation::takeBits(inst_, 15, 19); }
+    size_t Store::takeRs1() { return BitsManipulation::takeBits(inst_, 15, 19); }
 
-    size_t Store::takeRS2Idx() { return BitsManipulation::takeBits(inst_, 20, 24); }
+    size_t Store::takeRs2() { return BitsManipulation::takeBits(inst_, 20, 24); }
 
     AddrType Store::takeOffset()
     {
-        return BitsManipulation::extendSign(
-            BitsManipulation::takeBits(inst_, 7, 11)
-                | (BitsManipulation::takeBits(inst_, 25, 31) << 5),
-            11);
+        AddrType offset = BitsManipulation::takeBits(inst_, 7, 11)
+                          | (BitsManipulation::takeBits(inst_, 25, 31) << 5);
+        return BitsManipulation::extendSign(offset, 11);
     }
 
     u8 Store::takeFunc3() { return BitsManipulation::takeBits(inst_, 12, 14); }

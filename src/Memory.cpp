@@ -18,10 +18,10 @@ namespace rvemu
 
     void SystemInterface::loadCode(const std::string &file_name)
     {
-        std::ifstream input_file;
+        std::ifstream inputFile;
 
-        input_file.open(file_name, std::ios::binary);
-        if (input_file.is_open() == false)
+        inputFile.open(file_name, std::ios::binary);
+        if (inputFile.is_open() == false)
         {
             std::cerr << "Invalid file name: " << file_name << "\n";
             abort();
@@ -29,7 +29,7 @@ namespace rvemu
 
         AddrType instAddr = DRAM_BASE;
         unsigned char b;
-        while (input_file.read(reinterpret_cast<char *>(&b), Byte))
+        while (inputFile.read(reinterpret_cast<char *>(&b), Byte))
         {
             memory_.write(instAddr, b, Byte);
             instAddr += Byte;
@@ -47,87 +47,86 @@ namespace rvemu
     inline void handleAlignmentEx() { std::cout << "Access to misaligned data\t"; }
 
     RegisterSizeType
-    readFromMemory(MemoryType &mem, AddrType base, AddrType read_from, DataSizeType data_size)
+    readFromMemory(MemoryType &mem, AddrType base, AddrType readFrom, DataSizeType dataSize)
     {
-        RegisterSizeType data_to_take = 0;
-        assert(read_from >= base);
-        const size_t index = read_from - base;
+        RegisterSizeType dataToTake = 0;
+        assert(readFrom >= base);
+        const size_t index = readFrom - base;
         assert(index < mem.size());
 
-        for (size_t i = 0; i < data_size; ++i)
+        for (size_t i = 0; i < dataSize; ++i)
         {
-            data_to_take |= std::to_integer<decltype(data_to_take)>(mem[index + i]) << (8 * i);
+            dataToTake |= std::to_integer<decltype(dataToTake)>(mem[index + i]) << (8 * i);
         }
-        return data_to_take;
+        return dataToTake;
     }
 
     bool SystemInterface::checkLimit(AddrType a)
     {
-        size_t indx = a - DRAM_BASE;
-        return (a >= DRAM_BASE) && indx < DRAM_BASE;
+        size_t index = a - DRAM_BASE;
+        return (a >= DRAM_BASE) && index < DRAM_BASE;
     }
 
     void writeToMemory(MemoryType &mem,
                        AddrType base,
-                       AddrType where_to_write,
-                       RegisterSizeType what_to_write,
+                       AddrType whereToWrite,
+                       RegisterSizeType whatToWrite,
                        DataSizeType size)
     {
 #ifdef DEB_BIN_INS
         std::bitset<64> whs_b(what_to_write);
         std::cout << "what_to_store_binary = " << whs_b << std::endl;
 #endif
-        assert(where_to_write >= base);
-        size_t indx = where_to_write - base;
+        assert(whereToWrite >= base);
+        size_t indx = whereToWrite - base;
         assert(indx < mem.size());
 
         for (size_t i = 0; i < size; ++i)
         {
-            std::byte byte_to_store = std::byte(what_to_write >> (8 * i));
+            std::byte byteToStore = std::byte(whatToWrite >> (8 * i));
 #ifdef DEB_BIN_INS
             std::cout << "byte_to_store = " << byte_to_store << "\n";
 #endif
-            mem[indx + i] = byte_to_store;
+            mem[indx + i] = byteToStore;
         }
     }
 
-    RegisterSizeType SystemInterface::readData(AddrType read_from, DataSizeType sz)
+    RegisterSizeType SystemInterface::readData(AddrType readFrom, DataSizeType sz)
     {
-        assert(checkLimit(read_from));
-        if (isAlign(read_from, sz) == false)
+        assert(checkLimit(readFrom));
+        if (isAlign(readFrom, sz) == false)
         {
             handleAlignmentEx();
         }
-        return memory_.read(read_from, sz);
+        return memory_.read(readFrom, sz);
         throw("Invalid read location\n");
         abort();
     }
 
-    bool SystemInterface::validWrite(AddrType write_to)
+    bool SystemInterface::validWrite(AddrType writeTo)
     {
-        return lastInst_ <= write_to && write_to < (DRAM_BASE + DRAM_SIZE);
+        return lastInst_ <= writeTo && writeTo < (DRAM_BASE + DRAM_SIZE);
     }
 
-    void
-    SystemInterface::writeData(AddrType write_to, RegisterSizeType what_write, DataSizeType sz)
+    void SystemInterface::writeData(AddrType writeTo, RegisterSizeType whatWrite, DataSizeType sz)
     {
-        assert(checkLimit(write_to));
-        if (isAlign(write_to, sz) == false)
+        assert(checkLimit(writeTo));
+        if (isAlign(writeTo, sz) == false)
         {
             handleAlignmentEx();
         }
-        return memory_.write(write_to, what_write, sz);
+        return memory_.write(writeTo, whatWrite, sz);
         throw("Invalid write location\n");
         abort();
     }
 
-    void DRAM::write(AddrType where_to_write, RegisterSizeType what_to_write, DataSizeType size)
+    void DRAM::write(AddrType whereToWrite, RegisterSizeType whatToWrite, DataSizeType size)
     {
-        writeToMemory(m_dram, DRAM_BASE, where_to_write, what_to_write, size);
+        writeToMemory(dram_, DRAM_BASE, whereToWrite, whatToWrite, size);
     }
 
-    RegisterSizeType DRAM::read(AddrType read_from, DataSizeType data_size)
+    RegisterSizeType DRAM::read(AddrType readFrom, DataSizeType dataSize)
     {
-        return readFromMemory(m_dram, DRAM_BASE, read_from, data_size);
+        return readFromMemory(dram_, DRAM_BASE, readFrom, dataSize);
     }
 }    // namespace rvemu

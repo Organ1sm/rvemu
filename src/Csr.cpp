@@ -9,12 +9,27 @@
 
 namespace rvemu
 {
+    /**
+     * @brief Write a value to the CSR at the specified destination address.
+     *
+     * @param dest the destination address where the value will be written
+     * @param what the value to be written to the destination address
+     *
+     * @throws AssertionException if the destination address exceeds the limit
+     */
     void CSRInterface::write(const AddrType dest, const RegisterSizeType what)
     {
         assert(checkLimit(dest));
         csrs_[dest] = what;
     }
 
+    /**
+     * @brief Read a value from the CSR at the specified destination address.
+     *
+     * @param where the source address where the value will be readed
+     *
+     * @throws AssertionException if the destination address exceeds the limit
+     */
     RegisterSizeType CSRInterface::read(AddrType where) const
     {
         assert(checkLimit(where));

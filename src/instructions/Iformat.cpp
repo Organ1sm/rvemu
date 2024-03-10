@@ -9,9 +9,9 @@
 
 namespace rvemu
 {
-    std::size_t I::takeRegS() { return BitsManipulation::takeBits(inst_, 15, 19); }
+    std::size_t I::takeRs() { return BitsManipulation::takeBits(inst_, 15, 19); }
 
-    std::size_t I::takeRegD() { return BitsManipulation::takeBits(inst_, 7, 11); }
+    std::size_t I::takeRd() { return BitsManipulation::takeBits(inst_, 7, 11); }
 
     RegisterSizeType I::takeOffset()
     {
@@ -122,7 +122,7 @@ namespace rvemu
     // belongs to the I-format
     AddrType Jris::moveNextInst()
     {
-        AddrType next_instruction = (rs_ + offset_) & (~1);    // set last digit to 0
-        return next_instruction;
+        AddrType nextInst = (rs_ + offset_) & (~1);    // set last digit to 0
+        return nextInst;
     }
 }    // namespace rvemu

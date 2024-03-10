@@ -18,6 +18,9 @@ namespace rvemu
         void dumpCSRs() const;
 
       public:
+        // This unordered_map called csrAddrs_ with string keys and std::size_t values. Each key
+        // represents a CSR(Control and Status Register) name, and the corresponding value
+        // represents its address
         static const std::unordered_map<std::string, std::size_t> csrAddrs_;
 
       private:
