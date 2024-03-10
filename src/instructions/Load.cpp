@@ -12,13 +12,13 @@ namespace rvemu
 
     void Load::accessMemory(SystemInterface &bus)
     {
-        assert(func3_ <= 5);
+        assert(func3_ <= 6);
         DataSizeType sz;
         if (func3_ == 0 || func3_ == 4)         // lb or lbu
             sz = Byte;
         else if (func3_ == 1 || func3_ == 5)    // lh or lhu
             sz = HalfWord;
-        else if (func3_ == 2)                   // lw
+        else if (func3_ == 2 || func3_ == 6)    // lw or lwu
             sz = Word;
         else
         {
