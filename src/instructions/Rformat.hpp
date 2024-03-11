@@ -21,21 +21,25 @@ namespace rvemu
         void writeBack(Registers &) override;
 
       protected:
-        // Enum class representing the type of R-format operation by fusing func3 and the last two
-        // bits. This is specific to R-format instructions and does not apply to all immediate
+        // Enum class representing the type of R-format operation by fusing func3 and func7 bits.
+        // This is specific to R-format instructions and does not apply to all immediate
         // instructions.
-        enum class Type : u8 {
-            Add  = 0b0'0000,
-            Sub  = 0b0'1000,
-            Sll  = 0b0'0001,
-            Slt  = 0b0'0010,
-            Sltu = 0b0'0011,
-            Xor  = 0b0'0100,
-            Srl  = 0b0'0101,
-            Sra  = 0b0'1101,
-            Or   = 0b0'0110,
-            And  = 0b0'0111,
+        // clang-format off
+        enum class Type : u16 {
+            Add  = 0b0000000'000,
+            Mul  = 0b0000001'000,
+            Sub  = 0b0100000'000,
+            Sll  = 0b0000000'001,
+            Slt  = 0b0000000'010,
+            Sltu = 0b0000000'011,
+            Xor  = 0b0000000'100,
+            Srl  = 0b0000000'101,
+            Sra  = 0b0100000'101,
+            Or   = 0b0000000'110,
+            And  = 0b0000000'111,
         };
+
+        // clang-format on
 
         /// Constructor for R-format instruction, initializing the instruction format and
         /// registers.
@@ -71,6 +75,7 @@ namespace rvemu
 
       private:
         void add();
+        void mul();
         void sub();
         void sll();
         void slt();
