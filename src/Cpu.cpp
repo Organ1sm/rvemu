@@ -117,6 +117,7 @@ namespace rvemu
             case OpcodeType::Immop:   instFormat = std::make_unique<ImmOp>(inst, pc_); break;
             case OpcodeType::Immop64: instFormat = std::make_unique<ImmOp64>(inst, pc_); break;
             case OpcodeType::Op:      instFormat = std::make_unique<Op>(inst, pc_); break;
+            case OpcodeType::Op64:    instFormat = std::make_unique<Op64>(inst, pc_); break;
             case OpcodeType::Fence:   instFormat = std::make_unique<Fence>(inst, pc_); break;
             case OpcodeType::System:  {
                 u8 func3 = BitsManipulation::takeBits(inst, 12, 14);

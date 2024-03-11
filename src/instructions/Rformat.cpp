@@ -37,8 +37,8 @@ namespace rvemu
 
     void Op::sll()
     {
-        auto lower_five_bits = BitsManipulation::takeBits(rs2_, 0, 4);
-        rd_                  = rs1_ << lower_five_bits;
+        auto shamt = BitsManipulation::takeBits(rs2_, 0, 5);
+        rd_        = rs1_ << shamt;
     }
 
     void Op::slt()
@@ -53,9 +53,9 @@ namespace rvemu
 
     void Op::xorop() { rd_ = rs1_ ^ rs2_; }
 
-    void Op::srl() { rd_ = rs1_ >> BitsManipulation::takeBits(rs2_, 0, 4); }
+    void Op::srl() { rd_ = rs1_ >> BitsManipulation::takeBits(rs2_, 0, 5); }
 
-    void Op::sra() { rd_ = static_cast<int32_t>(rs1_) >> BitsManipulation::takeBits(rs2_, 0, 4); }
+    void Op::sra() { rd_ = static_cast<int32_t>(rs1_) >> BitsManipulation::takeBits(rs2_, 0, 5); }
 
     void Op::orop() { rd_ = rs1_ | rs2_; }
 
@@ -89,4 +89,44 @@ namespace rvemu
         std::cout << is_name << " " << printRegIndex(rdIdx_) << " = " << printRegIndex(rs1Idx_)
                   << " " << op << " " << printRegIndex(rs2Idx_) << std::endl;
     }
+
+    void Op64::addw() { rd_ = BitsManipulation::extendSign(rs1_ + rs2_, 31); }
+
+    void Op64::subw() { rd_ = BitsManipulation::extendSign(rs1_ - rs2_, 31); }
+
+    void Op64::sllw()
+    {
+        auto shamt = BitsManipulation::takeBits(rs2_, 0, 4);
+        rd_        = BitsManipulation::extendSign((rs1_ & 0xFFFF'FFFF) << shamt, 31);
+    }
+
+    void Op64::srlw()
+    {
+        auto shamt = BitsManipulation::takeBits(rs2_, 0, 4);
+        rd_        = BitsManipulation::extendSign((rs1_ & 0xFFFF'FFFF) >> shamt, 31);
+    }
+
+    void Op64::sraw()
+    {
+        int shamt = BitsManipulation::takeBits(rs2_, 0, 4);
+        rd_       = BitsManipulation::extendSign(static_cast<int32_t>(rs1_) >> shamt, 31);
+    }
+
+    void Op64::execution()
+    {
+        switch (type)
+        {
+            case Type::Add: addw(); break;
+            case Type::Sub: subw(); break;
+            case Type::Sll: sllw(); break;
+            case Type::Srl: srlw(); break;
+            case Type::Sra: sraw(); break;
+
+            default: {
+                std::cerr << "Error: no matching in switch cases\n";
+                abort();
+            }
+        }
+    }
+
 }    // namespace rvemu

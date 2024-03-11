@@ -6,7 +6,6 @@
 
 #include <cstdint>
 #include <iostream>
-#include <shared_mutex>
 
 namespace rvemu
 {

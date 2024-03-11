@@ -87,4 +87,20 @@ namespace rvemu
         void andop();
         void printInstruction(const std::string &instName, const std::string &op);
     };
+
+    class Op64 : public R
+    {
+      public:
+        Op64(const InstSizeType is, const AddrType pc) : R(is, pc) { }
+
+        /// Executes the specific R-format operation based on the decoded type.
+        void execution() override;
+
+      private:
+        void addw();
+        void subw();
+        void sllw();
+        void srlw();
+        void sraw();
+    };
 }    // namespace rvemu

@@ -54,8 +54,9 @@ namespace rvemu
             Load    = 0b000'0011,    // Load from memory
             Store   = 0b010'0011,    // Store to memory
             Immop   = 0b001'0011,    // Immediate arithmetic operation
-            Immop64 = 0b001'1011,    // Immediate arithmetic operation
+            Immop64 = 0b001'1011,    // Immediate arithmetic operation(RV64)
             Op      = 0b011'0011,    // Register-register arithmetic operation
+            Op64    = 0b011'1011,    // Register-register arithmetic operation(RV64)
             Fence   = 0b000'1111,    // Memory fence operation
             System  = 0b111'0011     // System instructions
         };
