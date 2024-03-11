@@ -1,6 +1,9 @@
 out/*
 .cache/*
 build/*
+tests/bin_files/*
+*.s
+*.bin
 # Prerequisites
 *.d
 

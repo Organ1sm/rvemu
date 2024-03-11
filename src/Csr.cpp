@@ -20,7 +20,19 @@ namespace rvemu
     void CSRInterface::write(const AddrType dest, const RegisterSizeType what)
     {
         assert(checkLimit(dest));
-        csrs_[dest] = what;
+        switch (dest)
+        {
+            case SIE:
+                csrs_[MIE] = (csrs_[MIE] & ~csrs_[MIDELEG]) | (what & csrs_[MIDELEG]);
+                break;
+            case SIP:
+                csrs_[MIP] = (csrs_[MIE] & ~csrs_[MIDELEG]) | (what & csrs_[MIDELEG]);
+                break;
+            case SSTATUS:
+                csrs_[MSTATUS] = (csrs_[MSTATUS] & ~MASK_SSTATUS) | (what & MASK_SSTATUS);
+                break;
+            default: csrs_[dest] = what;
+        }
     }
 
     /**
@@ -33,7 +45,13 @@ namespace rvemu
     RegisterSizeType CSRInterface::read(AddrType where) const
     {
         assert(checkLimit(where));
-        return csrs_[where];
+        switch (where)
+        {
+            case SIE:     return csrs_[MIE] & csrs_[MIDELEG];
+            case SIP:     return csrs_[MIP] & csrs_[MIDELEG];
+            case SSTATUS: return csrs_[MSTATUS] & MASK_SSTATUS;
+            default:      return csrs_[where];
+        }
     }
 
     /**
