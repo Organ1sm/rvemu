@@ -6,6 +6,7 @@
 
 #include <cstdint>
 #include <iostream>
+#include <shared_mutex>
 
 namespace rvemu
 {
@@ -25,11 +26,7 @@ namespace rvemu
 
     void I::writeBack(Registers &regs) { regs.write(rdIdx_, rd_); }
 
-    void ImmOp::addi()
-    {
-        std::string op = "+";
-        rd_            = arith(rs_, op, offset_);
-    }
+    void ImmOp::addi() { rd_ = rs_ + offset_; }
 
     void ImmOp::slti()
     {
@@ -46,43 +43,28 @@ namespace rvemu
 
     void ImmOp::sltiu() { rd_ = rs_ < offset_ ? 1 : 0; }
 
-    void ImmOp::xori()
-    {
-        std::string op = "^";
-        rd_            = arith(rs_, op, offset_);
-    }
+    void ImmOp::xori() { rd_ = rs_ ^ offset_; }
 
-    void ImmOp::ori()
-    {
-        std::string op = "|";
-        rd_            = arith(rs_, op, offset_);
-    }
+    void ImmOp::ori() { rd_ = rs_ | offset_; }
 
-    void ImmOp::andi()
-    {
-        std::string op = "&";
-        rd_            = arith(rs_, op, offset_);
-    }
+    void ImmOp::andi() { rd_ = rs_ & offset_; }
 
     void ImmOp::slli()
     {
-        std::string op         = "<<";
         RegisterSizeType shamt = BitsManipulation::takeBits(inst_, 20, 24);
-        rd_                    = arith(rs_, op, shamt);
+        rd_                    = rs_ << shamt;
     }
 
     void ImmOp::srli()
     {
-        std::string op         = ">>L";
         RegisterSizeType shamt = BitsManipulation::takeBits(inst_, 20, 24);
-        rd_                    = arith(rs_, op, shamt);
+        rd_                    = rs_ >> shamt;
     }
 
     void ImmOp::srai()
     {
-        std::string op         = ">>A";
         RegisterSizeType shamt = BitsManipulation::takeBits(inst_, 20, 24);
-        rd_                    = arith(rs_, op, shamt);
+        rd_                    = static_cast<i64>(rs_) >> shamt;
     }
 
     void ImmOp::execution()
@@ -113,6 +95,54 @@ namespace rvemu
     }
 
     void ImmOp::printInstruction(const std::string &is_name, const std::string &op) { }
+
+    void ImmOp64::addiw()
+    {
+        RegisterSizeType result = rs_ + offset_;
+        rd_                     = BitsManipulation::extendSign(result, 31);
+    }
+
+    void ImmOp64::slliw()
+    {
+        RegisterSizeType shamt = BitsManipulation::takeBits(inst_, 20, 24);
+        RegisterSizeType res   = (rs_ << shamt) & 0xFFFF'FFFF;
+        rd_                    = BitsManipulation::extendSign(res, 31);
+    }
+
+    void ImmOp64::srliw()
+    {
+        RegisterSizeType shamt = BitsManipulation::takeBits(inst_, 20, 24);
+        RegisterSizeType res   = (rs_ & 0xFFFF'FFFF) >> shamt;
+        rd_                    = BitsManipulation::extendSign(res, 31);
+    }
+
+    void ImmOp64::sraiw()
+    {
+        RegisterSizeType shamt = BitsManipulation::takeBits(inst_, 20, 24);
+        rd_                    = static_cast<int32_t>(rs_) >> shamt;
+    }
+
+    void ImmOp64::execution()
+    {
+        switch (func3_)
+        {
+            case Func3Type::Addiw: addiw(); break;
+            case Func3Type::Slliw: slliw(); break;
+
+            case Func3Type::SrliwOrSraiw: {
+                if (BitsManipulation::takeBits(inst_, 30, 31) == 0)
+                    srliw();
+                if (BitsManipulation::takeBits(inst_, 30, 31) == 1)
+                    sraiw();
+                break;
+            }
+
+            default: {
+                std::cerr << "Error: input no matching cases\n";
+                abort();
+            }
+        }
+    }
 
     // Jris
     void Jris::execution() { rd_ = currPC_ + DataSizeType::Word; }

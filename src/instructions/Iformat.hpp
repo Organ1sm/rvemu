@@ -96,6 +96,38 @@ namespace rvemu
         Func3Type func3_;
     };
 
+    class ImmOp64 : public I
+    {
+      private:
+        enum class Func3Type : u8 {
+            Addiw        = 0b000,    // Add Immediate
+            Slliw        = 0b001,    // Shift Left Logical Immediate
+            SrliwOrSraiw = 0b101,    // Shift Right Logical/Arithmetic Immediate
+        };
+
+      public:
+        ImmOp64(const InstSizeType is, const AddrType pc) : I(is, pc), func3_ {I::func3_} { }
+
+        /**
+         * Executes the instruction based on the decoded func3 value.
+         * Calls the respective operation method associated with the func3.
+         */
+        void execution() override;
+
+      private:
+        // Private methods for handling each specific immediate operation.
+        // These methods are called from the execution() method.
+        void addiw();    // Handles the ADDIW instruction.
+        void slliw();    // Handles the SLLIW instruction.
+        void srliw();    // Handles the SRLIW instruction.
+        void sraiw();    // Handles the SRAIW instruction.
+
+        void printInstruction(const std::string &is_name, const std::string &op);
+
+        // func3 value used to identify the instruction type within the I-format class.
+        Func3Type func3_;
+    };
+
     class Jris : public I
     {
       public:
