@@ -2,6 +2,8 @@
 #include "Rformat.hpp"
 
 #include "../BitsManipulation.hpp"
+#include "../Cpu.hpp"
+#include "../Csr.hpp"
 #include "../Registers.hpp"
 
 #include <cstdint>
@@ -129,4 +131,78 @@ namespace rvemu
         }
     }
 
+    ModeRet::Func7Type ModeRet::takeFunc7()
+    {
+        auto func7 = Func7Type(BitsManipulation::takeBits(inst_, 25, 31));
+        switch (func7)
+        {
+            case Func7Type::Sret: this->csrAddr_ = SSTATUS; break;
+            case Func7Type::Mret: this->csrAddr_ = MSTATUS; break;
+
+            default: break;
+        }
+        return func7;
+    }
+
+    void ModeRet::sret()
+    {
+        u64 sstatus = csrValue_;
+        Mode mode   = (sstatus & MASK_SPP) >> 8;
+        cpu_.setMode(mode);
+        u64 spie = (sstatus & MASK_SPIE) >> 5;
+        sstatus  = (sstatus & ~MASK_SIE) | (spie << 1);
+        sstatus |= MASK_SPIE;
+        sstatus &= ~MASK_SPP;
+        csrValue_ = sstatus;
+    }
+
+    void ModeRet::mret()
+    {
+        u64 mstauts = csrValue_;
+        Mode mode   = (mstauts & MASK_SPP) >> 11;
+        cpu_.setMode(mode);
+        u64 mpie = (mstauts & MASK_MPIE) >> 5;
+        mstauts  = (mstauts & ~MASK_SIE) | (mpie << 3);
+        mstauts |= MASK_MPIE;
+        mstauts &= ~MASK_MPP;
+        if ((mstauts & MASK_MPP) != Machine)
+            mstauts &= ~MASK_MPRV;
+
+        csrValue_ = mstauts;
+    }
+
+    void ModeRet::sfenceVMA() { nextInst_ = currPC_ + DataSizeType::Word; }
+
+    void ModeRet::execution()
+    {
+        switch (func7_)
+        {
+            case Func7Type::Sret:      sret(); break;
+            case Func7Type::Mret:      mret(); break;
+            case Func7Type::SFenceVMA: sfenceVMA(); break;
+
+            default: {
+                std::cerr << "Error: no matching in switch cases\n";
+                abort();
+            }
+        }
+    }
+
+    void ModeRet::readCsr(const CSRInterface &csrs) { csrValue_ = csrs.read(csrAddr_); }
+
+    void ModeRet::writeCsr(CSRInterface &csrs)
+    {
+        if (func7_ == Func7Type::Sret || func7_ == Func7Type::Mret)
+            csrs.write(csrAddr_, csrValue_);
+
+        switch (func7_)
+        {
+            case Func7Type::Sret: nextInst_ = csrs.read(SEPC) & ~0b11; break;
+            case Func7Type::Mret: nextInst_ = csrs.read(MEPC) & ~0b11; break;
+
+            default: break;
+        }
+    }
+
+    AddrType ModeRet::moveNextInst() { return nextInst_; }
 }    // namespace rvemu

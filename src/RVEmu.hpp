@@ -20,6 +20,15 @@ namespace rvemu
     constexpr uint8_t LAST_OPCODE_DIGIT = 6;
     constexpr uint8_t OPCODE_LEN        = 7;
 
+    // RISC-V privilege mode
+    using Mode = uint64_t;
+    /// User mode
+    constexpr Mode User = 0b00;
+    /// Supervisor mode
+    constexpr Mode Supervisor = 0b01;
+    /// Machine mode
+    constexpr Mode Machine = 0b11;
+
     using u8  = uint8_t;
     using u16 = uint16_t;
     using u32 = uint32_t;

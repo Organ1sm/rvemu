@@ -34,6 +34,8 @@ namespace rvemu
         // Fetches the value of a register by its name.
         std::optional<u64> getRegValueByName(const std::string &name);
 
+        void setMode(Mode mode) { mode_ = mode; }
+
         // Prints the contents of the CPU registers.
         void dumpRegisters();
 
@@ -66,6 +68,7 @@ namespace rvemu
         AddrType lastInstAddr_;      // Address of the last instruction in the program
         CSRInterface csrs_;          // Control and Status Registers interface
         SystemInterface bus_;        // System bus interface
+        Mode mode_;                  // The current privilege mode
 
         // Sets the last instruction address of the program.
         void setLastInstAddr(const AddrType lastInst) { lastInstAddr_ = lastInst; }

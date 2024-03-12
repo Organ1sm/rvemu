@@ -24,6 +24,7 @@ namespace rvemu
     CPU::CPU(const std::string &fileName) : pc_(DRAM_BASE), bus_ {fileName}
     {
         lastInstAddr_ = bus_.getLastInstr();
+        mode_         = Machine;
     }
 
     std::optional<u64> CPU::getRegValueByName(const std::string &name)
@@ -121,8 +122,13 @@ namespace rvemu
             case OpcodeType::Fence:   instFormat = std::make_unique<Fence>(inst, pc_); break;
             case OpcodeType::System:  {
                 u8 func3 = BitsManipulation::takeBits(inst, 12, 14);
+                u8 func7 = BitsManipulation::takeBits(inst, 25, 31);
+
                 if (func3 != 0)
                     instFormat = std::make_unique<CSR>(inst, pc_);
+
+                if (func3 == 0 && func7 != 0)
+                    instFormat = std::make_unique<ModeRet>(inst, pc_, *this);
                 break;
             }
 

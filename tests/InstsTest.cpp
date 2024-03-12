@@ -486,11 +486,11 @@ namespace rvemu
 
         CPU cpu = rvHelper(code, "test_csrs1", 11);
 
-        // REQUIRE(cpu.getRegValueByName("mstatus") == 1);
-        // REQUIRE(cpu.getRegValueByName("mtvec") == 2);
-        // REQUIRE(cpu.getRegValueByName("mepc") == 3);
-        // REQUIRE(cpu.getRegValueByName("sstatus") == 0);
-        // REQUIRE(cpu.getRegValueByName("stvec") == 5);
-        // REQUIRE(cpu.getRegValueByName("sepc") == 6);
+        REQUIRE(cpu.getRegValueByName("mstatus") == 1);
+        REQUIRE(cpu.getRegValueByName("mtvec") == 2);
+        REQUIRE(cpu.getRegValueByName("mepc") == 3);
+        REQUIRE(cpu.getRegValueByName("sstatus") == 0);
+        REQUIRE(cpu.getRegValueByName("stvec") == 5);
+        REQUIRE(cpu.getRegValueByName("sepc") == 6);
     }
 }    // namespace rvemu

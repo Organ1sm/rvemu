@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../Cpu.hpp"
 #include "InstFormat.hpp"
 
 namespace rvemu
@@ -102,5 +103,41 @@ namespace rvemu
         void sllw();
         void srlw();
         void sraw();
+    };
+
+    class ModeRet : public R
+    {
+      public:
+        ModeRet(const InstSizeType is, const AddrType pc, CPU &cpu)
+          : R(is, pc), func7_(takeFunc7()), cpu_(cpu)
+        { }
+
+        void readCsr(const CSRInterface &csr) override;
+
+        void writeCsr(CSRInterface &csr) override;
+
+        void execution() override;
+
+        AddrType moveNextInst() override;
+
+        enum class Func7Type : u8 {
+            Sret      = 0x8,
+            SFenceVMA = 0x9,
+            Mret      = 0x18,
+        };
+
+      protected:
+        Func7Type takeFunc7();
+
+        Func7Type func7_;
+        u16 csrAddr_;
+        RegisterSizeType csrValue_;
+        AddrType nextInst_;
+        CPU &cpu_;
+
+      private:
+        void sret();
+        void mret();
+        void sfenceVMA();
     };
 }    // namespace rvemu
