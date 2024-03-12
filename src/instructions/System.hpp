@@ -2,6 +2,8 @@
 
 #include "InstFormat.hpp"
 
+#include <iostream>
+
 namespace rvemu
 {
     class System : public InstructionFormat
@@ -35,6 +37,14 @@ namespace rvemu
         u8 qty_;             // Quantity to distinguish from immediate and normal CSR operations.
         Func3Type func3_;    // Function 3-bit code.
         u16 func12_;         // Function 12-bit code.
+    };
+
+    class Ecall : public System
+    {
+      public:
+        Ecall(const InstSizeType is, const AddrType pc) : System(is, pc) { }
+
+        void execution() override { std::cout << "Calling to operative system\n"; }
     };
 
     class CSR : public System

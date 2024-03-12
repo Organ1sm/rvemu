@@ -126,9 +126,12 @@ namespace rvemu
 
                 if (func3 != 0)
                     instFormat = std::make_unique<CSR>(inst, pc_);
+                else
+                    instFormat = std::make_unique<Ecall>(inst, pc_);
 
                 if (func3 == 0 && func7 != 0)
                     instFormat = std::make_unique<ModeRet>(inst, pc_, *this);
+
                 break;
             }
 
