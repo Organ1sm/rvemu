@@ -103,13 +103,6 @@ add_executable(
     tests/testUtil.cpp
     tests/InstsTest.cpp
 )
-# add_executable(csrTest tests/CSRTest.cpp)
-# add_executable(cpuTest tests/CPUTest.cpp)
-# add_executable(busTest tests/BUSTest.cpp)
-# add_executable(dramTest tests/DRAMTest.cpp)
 
 add_test_target(instsTest)
-# add_test_target(cpuTest)
-# add_test_target(busTest)
-# add_test_target(csrTest)
-# add_test_target(dramTest)
+
